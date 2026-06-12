@@ -1,0 +1,26 @@
+{
+  "expo": {
+    "name": "Rnai.io Mobile",
+    "slug": "rnai-mobile",
+    "version": "1.9.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#34308C"
+    },
+    "ios": {
+      "supportsTabletMode": true,
+      "bundleIdentifier": "io.rnai.mobile"
+    },
+    "android": {
+      "package": "io.rnai.mobile",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#34308C"
+      }
+    },
+    "plugins": []
+  }
+}
