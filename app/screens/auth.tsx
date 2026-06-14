@@ -6,7 +6,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
-  KeyboardAvoidingView, Platform, Alert, ActivityIndicator,
+  KeyboardAvoidingView, Platform, Alert, ActivityIndicator, Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -121,9 +121,11 @@ export default function AuthScreen() {
       >
         <ScrollView
           contentContainerStyle={{
-            flexGrow: 1, justifyContent: 'center',
+            flexGrow: 1,
             paddingHorizontal: LAYOUT.screenPadding,
-            paddingTop: insets.top + SPACING.xl,
+            // Fixed top offset — logo sits at the same position in both
+            // Sign In and Sign Up modes (no vertical re-centering jump)
+            paddingTop: insets.top + 72,
             paddingBottom: insets.bottom + SPACING.xl,
           }}
           keyboardShouldPersistTaps="handled"
@@ -153,25 +155,26 @@ export default function AuthScreen() {
           </View>
 
           {/* ── Brand hero ── */}
-          <View style={{ alignItems: 'center', marginBottom: SPACING.xxl }}>
-            <LinearGradient
-              colors={[colors.primary, colors.secondary ?? colors.primary]}
-              style={{
-                width: 84, height: 84, borderRadius: 26,
-                justifyContent: 'center', alignItems: 'center',
-                marginBottom: SPACING.lg,
-                shadowColor: colors.primary,
-                shadowOffset: { width: 0, height: 8 },
-                shadowOpacity: 0.3, shadowRadius: 16, elevation: 8,
-              }}
-            >
-              <Text style={{ fontSize: 42 }}>⚡</Text>
-            </LinearGradient>
+          <View style={{ alignItems: 'center', marginBottom: SPACING.xl }}>
+            <View style={{
+              borderRadius: 26,
+              marginBottom: SPACING.lg,
+              shadowColor: '#34308C',
+              shadowOffset: { width: 0, height: 10 },
+              shadowOpacity: 0.35, shadowRadius: 20, elevation: 10,
+            }}>
+              <Image
+                source={require('../../assets/icon.png')}
+                style={{ width: 96, height: 96, borderRadius: 26 }}
+                resizeMode="cover"
+              />
+            </View>
             <Text style={{
-              fontSize: 30, fontWeight: '800',
+              fontSize: 30, fontWeight: '800', letterSpacing: 0.5,
               color: isVibrant ? colors.primary : colors.text.primary,
             }}>
-              Rnai.io
+              RnAi
+              <Text style={{ color: colors.text.tertiary, fontWeight: '600' }}>.io</Text>
             </Text>
             <Text style={{ ...TYPOGRAPHY.subheadline, color: colors.text.secondary, marginTop: 4, textAlign: 'center' }}>
               {th ? 'สร้างทุกอย่างด้วย AI — ภาพ ข้อความ เว็บไซต์ เสียง' : 'Create anything with AI — images, text, websites, audio'}

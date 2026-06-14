@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, TextInput } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -8,6 +8,32 @@ import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { SkillCard } from '../components/ui/SkillCard';
 import { isSkillReady } from '../services/api';
+import { getSkillCategory } from '../data/skillTemplates';
+
+// Brand color per skill — same palette as the Home grid
+const SKILL_COLORS: Record<string, string> = {
+  'image-gen':    '#9333EA',
+  'image-edit':   '#0EA5E9',
+  'remove-bg':    '#10B981',
+  'upscale':      '#F59E0B',
+  'stylize':      '#EC4899',
+  'text-gen':     '#8B5CF6',
+  'text-sum':     '#14B8A6',
+  'text-trans':   '#3B82F6',
+  'text-rewrite': '#F97316',
+  'website-gen':  '#6366F1',
+  'audio-tts':    '#06B6D4',
+};
+
+type CategoryFilter = 'all' | 'image' | 'text' | 'audio' | 'web';
+
+const CATEGORY_CHIPS: { id: CategoryFilter; emoji: string; color: string }[] = [
+  { id: 'all',   emoji: '✨', color: '#9333EA' },
+  { id: 'image', emoji: '🖼️', color: '#EC4899' },
+  { id: 'text',  emoji: '📝', color: '#8B5CF6' },
+  { id: 'audio', emoji: '🔊', color: '#06B6D4' },
+  { id: 'web',   emoji: '💻', color: '#6366F1' },
+];
 
 // Static icon map — labels/descriptions come from translations
 const SKILL_ICONS: Record<string, string> = {
@@ -33,6 +59,7 @@ export default function CreateScreen() {
   const { t } = useLanguage();
   const isVibrant = scheme === 'vibrant';
   const [searchText, setSearchText] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
 
   // Build skill list from translations
   const allSkills = SKILL_IDS.map(id => ({
@@ -43,9 +70,19 @@ export default function CreateScreen() {
   }));
 
   const filteredSkills = allSkills.filter(skill =>
-    skill.name.toLowerCase().includes(searchText.toLowerCase()) ||
-    skill.description.toLowerCase().includes(searchText.toLowerCase())
+    (categoryFilter === 'all' || getSkillCategory(skill.id) === categoryFilter) &&
+    (skill.name.toLowerCase().includes(searchText.toLowerCase()) ||
+     skill.description.toLowerCase().includes(searchText.toLowerCase()))
   );
+
+  const categoryLabel = (id: CategoryFilter): string => {
+    const f = t.library?.filters;
+    if (id === 'all') return f?.all ?? 'All';
+    if (id === 'image') return f?.images ?? 'Images';
+    if (id === 'text') return f?.text ?? 'Text';
+    if (id === 'audio') return f?.audio ?? 'Audio';
+    return f?.website ?? 'Website';
+  };
 
   const styles = StyleSheet.create({
     scrollContent: {
@@ -116,6 +153,44 @@ export default function CreateScreen() {
             />
           </View>
 
+          {/* ── Category filter chips ── */}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: SPACING.xl, gap: SPACING.sm }}
+          >
+            {CATEGORY_CHIPS.map(chip => {
+              const isActive = categoryFilter === chip.id;
+              return (
+                <TouchableOpacity
+                  key={chip.id}
+                  onPress={() => setCategoryFilter(chip.id)}
+                  activeOpacity={0.8}
+                  style={{
+                    flexDirection: 'row', alignItems: 'center', gap: 5,
+                    borderRadius: BORDER_RADIUS.full,
+                    paddingHorizontal: SPACING.lg, paddingVertical: SPACING.sm + 1,
+                    backgroundColor: isActive ? chip.color : colors.surface,
+                    borderWidth: isActive ? 0 : 1, borderColor: colors.borders,
+                    ...(isActive && {
+                      shadowColor: chip.color,
+                      shadowOffset: { width: 0, height: 3 },
+                      shadowOpacity: 0.3, shadowRadius: 8, elevation: 4,
+                    }),
+                  }}
+                >
+                  <Text style={{ fontSize: 13 }}>{chip.emoji}</Text>
+                  <Text style={{
+                    ...TYPOGRAPHY.caption, fontWeight: '700',
+                    color: isActive ? '#FFF' : colors.text.secondary,
+                  }}>
+                    {categoryLabel(chip.id)}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+
           {filteredSkills.length > 0 ? (
             <View style={styles.skillsList}>
               <Text style={styles.skillsLabel}>
@@ -127,6 +202,7 @@ export default function CreateScreen() {
                   icon={skill.icon}
                   name={skill.name}
                   description={skill.description}
+                  tint={SKILL_COLORS[skill.id]}
                   badge={isSkillReady(skill.id) ? undefined : (t.aiManager?.wallet?.comingSoon ?? 'Soon')}
                   onPress={() => (navigation as any).navigate('Skill', { id: skill.id })}
                 />

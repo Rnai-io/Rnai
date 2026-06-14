@@ -10,11 +10,14 @@ interface SkillCardProps {
   description: string;
   onPress: () => void;
   badge?: string;
+  /** Brand color for this skill — colors the icon tile and accent bar. */
+  tint?: string;
 }
 
-export function SkillCard({ icon, name, description, onPress, badge }: SkillCardProps) {
+export function SkillCard({ icon, name, description, onPress, badge, tint }: SkillCardProps) {
   const { colors, scheme } = useTheme();
   const isVibrant = scheme === 'vibrant';
+  const accent = tint ?? colors.primary;
 
   const styles = StyleSheet.create({
     container: {
@@ -27,20 +30,28 @@ export function SkillCard({ icon, name, description, onPress, badge }: SkillCard
       minHeight: TOUCH_TARGET_MIN,
       borderWidth: isVibrant ? 0 : 1,
       borderColor: colors.borders,
+      overflow: 'hidden',
       ...(isVibrant && {
-        shadowColor: colors.cardShadow,
+        shadowColor: tint ? accent : colors.cardShadow,
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.08,
+        shadowOpacity: tint ? 0.12 : 0.08,
         shadowRadius: 12,
         elevation: 4,
       }),
+    },
+    accentBar: {
+      position: 'absolute',
+      left: 0, top: 0, bottom: 0,
+      width: 4,
+      backgroundColor: accent,
+      opacity: 0.85,
     },
     iconContainer: {
       marginRight: SPACING.lg,
       width: 48,
       height: 48,
-      borderRadius: isVibrant ? 12 : 0,
-      backgroundColor: isVibrant ? `${colors.primary}15` : 'transparent',
+      borderRadius: isVibrant ? 14 : 10,
+      backgroundColor: `${accent}16`,
       justifyContent: 'center',
       alignItems: 'center',
     },
@@ -64,8 +75,9 @@ export function SkillCard({ icon, name, description, onPress, badge }: SkillCard
       style={styles.container}
       activeOpacity={0.7}
     >
+      {tint && <View style={styles.accentBar} />}
       <View style={styles.iconContainer}>
-        <Ionicons name={icon as any} size={28} color={colors.primary} />
+        <Ionicons name={icon as any} size={28} color={accent} />
       </View>
       <View style={styles.content}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: SPACING.sm }}>

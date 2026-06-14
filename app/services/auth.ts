@@ -234,6 +234,69 @@ export async function fetchBilling(): Promise<BillingInfo | null> {
   }
 }
 
+export interface LedgerEntry {
+  id: string;
+  type: string;            // free_grant | charge | refund | topup
+  credits: number;         // negative = spent
+  balanceAfter: number;
+  ref: string | null;
+  createdAt: string | null;
+}
+
+export interface LedgerInfo {
+  entries: LedgerEntry[];
+  /** Total credits ever spent — shown as RNAI reward points. */
+  lifetimeSpent: number;
+}
+
+/** Fetch the user's credit transaction history (wallet statement). */
+export async function fetchLedger(limit = 25): Promise<LedgerInfo | null> {
+  try {
+    const idToken = await getFreshIdToken();
+    if (!idToken) return null;
+    const res = await fetch(`${API_CONFIG.baseUrl}/api/billing/ledger?limit=${limit}`, {
+      headers: { Authorization: `Bearer ${idToken}` },
+    });
+    if (!res.ok) return null;
+    const data = await res.json().catch(() => null);
+    if (!data || !Array.isArray(data.entries)) return null;
+    return { entries: data.entries, lifetimeSpent: Number(data.lifetimeSpent) || 0 };
+  } catch {
+    return null;
+  }
+}
+
+export interface MyRank {
+  rank: number | null;
+  points: number;
+  eligible: boolean;
+  pool: number;
+  period: string;
+}
+
+/** Fetch the user's live monthly leaderboard rank. */
+export async function fetchMyRank(): Promise<MyRank | null> {
+  try {
+    const idToken = await getFreshIdToken();
+    if (!idToken) return null;
+    const res = await fetch(`${API_CONFIG.baseUrl}/api/rewards/leaderboard`, {
+      headers: { Authorization: `Bearer ${idToken}` },
+    });
+    if (!res.ok) return null;
+    const data = await res.json().catch(() => null);
+    if (!data?.me) return null;
+    return {
+      rank: data.me.rank ?? null,
+      points: Number(data.me.points) || 0,
+      eligible: !!data.me.eligible,
+      pool: Number(data.pool) || 0,
+      period: data.period ?? '',
+    };
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Permanently delete the Firebase account, then clear local state.
  * Throws AuthError — may require recent login (CREDENTIAL_TOO_OLD_LOGIN_AGAIN).
@@ -296,6 +359,37 @@ export async function wasAuthSkipped(): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+// ── Free cloud AI chat (Gemini via the Rnai.io platform) ───────────────────
+
+/**
+ * Chat with Gemini through the platform — free for signed-in users.
+ * Uses the stored refresh token to authenticate. Throws AuthError.
+ */
+export async function geminiChat(message: string): Promise<string> {
+  const idToken = await getFreshIdToken();
+  if (!idToken) {
+    throw new AuthError('UNKNOWN', 'Sign in required for cloud chat');
+  }
+  let res: Response;
+  try {
+    res = await fetch(`${API_CONFIG.baseUrl}/api/gemini/chat`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${idToken}`,
+      },
+      body: JSON.stringify({ message }),
+    });
+  } catch {
+    throw new AuthError('NETWORK', 'Network request failed');
+  }
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || typeof data?.text !== 'string') {
+    throw new AuthError('UNKNOWN', data?.error ?? 'Gemini chat failed');
+  }
+  return data.text;
 }
 
 // ── Password reset ──────────────────────────────────────────────────────────

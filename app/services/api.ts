@@ -100,15 +100,12 @@ export const SKILL_ENDPOINTS: Record<string, SkillEndpoint> = {
     buildPayload: ({ prompt }) => ({ prompt }),
   },
   'website-gen': {
-    path: '/api/v1/website/generate', ready: true,
-    buildPayload: ({ prompt, image }) => ({
-      websiteName: 'My Website',
-      websiteType: 'portfolio',
-      template: 'modern',
+    path: '/api/skills/website-gen', ready: true,
+    buildPayload: ({ prompt, extra }) => ({
+      template: extra?.template || 'wg-1',
+      title: extra?.title || prompt.substring(0, 50) || 'My Website',
       description: prompt,
-      websiteCustomPrompt: prompt,
-      websiteImage: image || undefined,
-      websiteImageUsage: 'design-reference',
+      customizations: extra || {},
     }),
   },
 

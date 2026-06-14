@@ -5,6 +5,7 @@ import {
   FlatList, Dimensions, Alert, Share,
   KeyboardAvoidingView, Platform, Linking,
 } from 'react-native';
+import WebView from 'react-native-webview';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -17,7 +18,7 @@ import { useLibrary } from '../context/LibraryContext';
 import { Ionicons } from '@expo/vector-icons';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
-import { SKILL_TEMPLATES, PromptTemplate, getSkillCategory } from '../data/skillTemplates';
+import { SKILL_TEMPLATES, PromptTemplate, getSkillCategory, localizeTemplate } from '../data/skillTemplates';
 import { executeSkill, isSkillReady, getErrorMessage, pingApi, ApiError, SkillResult } from '../services/api';
 import { ensurePlatformUser } from '../services/auth';
 
@@ -57,7 +58,7 @@ export default function SkillDetailScreen() {
   // Translate skill: default target = opposite of app language for convenience
   const [targetLang, setTargetLang] = useState(lang === 'en' ? 'Thai' : 'English');
 
-  const templates = SKILL_TEMPLATES[id] || [];
+  const templates = (SKILL_TEMPLATES[id] || []).map(tmpl => localizeTemplate(tmpl, lang));
   const skillCategory = getSkillCategory(id);
   const skillReady = isSkillReady(id);
 
@@ -616,28 +617,89 @@ export default function SkillDetailScreen() {
             )}
 
             {result && (
-              <Card backgroundColor={colors.primary} padding={SPACING.lg} style={{ marginTop: SPACING.xl }}>
+              <View style={{ marginTop: SPACING.xl }}>
                 {resultIsImage ? (
-                  <Image
-                    source={{ uri: result.content }}
-                    style={{ width: '100%', height: 300, borderRadius: BORDER_RADIUS.medium }}
-                    resizeMode="contain"
-                  />
+                  <Card backgroundColor={colors.primary} padding={SPACING.lg}>
+                    <Image
+                      source={{ uri: result.content }}
+                      style={{ width: '100%', height: 300, borderRadius: BORDER_RADIUS.medium }}
+                      resizeMode="contain"
+                    />
+                  </Card>
                 ) : result.kind === 'audio' ? (
-                  <TouchableOpacity
-                    onPress={() => Linking.openURL(result.content).catch(() => {})}
-                    style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: SPACING.md, paddingVertical: SPACING.lg }}
-                    activeOpacity={0.8}
-                  >
-                    <Ionicons name="play-circle" size={44} color={colors.text.inverse} />
-                    <Text style={{ ...TYPOGRAPHY.headline, color: colors.text.inverse }}>
-                      {lang === 'th' ? 'แตะเพื่อเปิดฟังเสียง' : 'Tap to play audio'}
-                    </Text>
-                  </TouchableOpacity>
+                  <Card backgroundColor={colors.primary} padding={SPACING.lg}>
+                    <TouchableOpacity
+                      onPress={() => Linking.openURL(result.content).catch(() => {})}
+                      style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: SPACING.md, paddingVertical: SPACING.lg }}
+                      activeOpacity={0.8}
+                    >
+                      <Ionicons name="play-circle" size={44} color={colors.text.inverse} />
+                      <Text style={{ ...TYPOGRAPHY.headline, color: colors.text.inverse }}>
+                        {lang === 'th' ? 'แตะเพื่อเปิดฟังเสียง' : 'Tap to play audio'}
+                      </Text>
+                    </TouchableOpacity>
+                  </Card>
+                ) : result.kind === 'website' ? (
+                  <>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: SPACING.lg }}>
+                      <Text style={{ ...TYPOGRAPHY.headline, color: colors.text.primary }}>
+                        🌐 {lang === 'th' ? 'ตัวอย่างเว็บไซต์' : 'Website Preview'}
+                      </Text>
+                      <TouchableOpacity
+                        onPress={() => {
+                          if (!savedId) {
+                            const newId = saveItem({
+                              type: 'website',
+                              skillId: id,
+                              skillName: skill.name,
+                              skillIcon: skill.icon,
+                              title: `${skill.name} — ${new Date().toLocaleTimeString()}`,
+                              content: result.content,
+                              sizeBytes: result.content.length,
+                            });
+                            setSavedId(newId);
+                            Alert.alert('✅', lang === 'th' ? 'บันทึกเป็น HTML ไฟล์แล้ว' : 'Saved as HTML file!');
+                          }
+                        }}
+                        style={{
+                          paddingHorizontal: SPACING.md,
+                          paddingVertical: SPACING.sm,
+                          backgroundColor: savedId ? (colors.success ?? '#10B981') : colors.primary,
+                          borderRadius: BORDER_RADIUS.full,
+                        }}
+                      >
+                        <Text style={{ color: '#FFF', ...TYPOGRAPHY.caption, fontWeight: '700' }}>
+                          {savedId ? '✓ Saved' : '💾 Save'}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                    <View style={{
+                      height: 500,
+                      borderRadius: BORDER_RADIUS.medium,
+                      overflow: 'hidden',
+                      backgroundColor: colors.surface,
+                      borderWidth: 1,
+                      borderColor: colors.borders,
+                    }}>
+                      <WebView
+                        source={{ html: result.content }}
+                        style={{ flex: 1 }}
+                        scalesPageToFit
+                        startInLoadingState
+                        renderLoading={() => (
+                          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                            <ActivityIndicator size="large" color={colors.primary} />
+                          </View>
+                        )}
+                      />
+                    </View>
+                  </>
                 ) : (
-                  <Text style={styles.resultText}>{resultDisplayText}</Text>
+                  <Card backgroundColor={colors.primary} padding={SPACING.lg}>
+                    <Text style={styles.resultText}>{resultDisplayText}</Text>
+                  </Card>
                 )}
-              </Card>
+              </View>
             )}
 
             {/* ── Save & Share row ── */}

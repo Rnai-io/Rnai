@@ -15,7 +15,7 @@ import React, { useState } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
   TextInput, Modal, Alert, Dimensions,
-  ActivityIndicator,
+  ActivityIndicator, Linking,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -24,6 +24,8 @@ import { TYPOGRAPHY, SPACING, LAYOUT, BORDER_RADIUS } from '../constants/design'
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { connectOllama, ollamaChat } from '../services/ollama';
+import { geminiChat, fetchBilling, fetchLedger, fetchMyRank, LedgerEntry, MyRank } from '../services/auth';
+import { useAuth } from '../context/AuthContext';
 
 const { width: W } = Dimensions.get('window');
 
@@ -31,18 +33,36 @@ const { width: W } = Dimensions.get('window');
 
 const AI_MODELS = [
   {
+    id: 'rnai-gemini',
+    name: 'Rnai Cloud Chat',
+    param: 'Gemini 2.5',
+    provider: 'Google × Rnai.io',
+    description: 'Free cloud AI chat for signed-in users. Works instantly — no setup, no downloads, powered by Gemini Flash.',
+    descriptionTh: 'แชท AI คลาวด์ฟรีสำหรับผู้ที่เข้าสู่ระบบ ใช้ได้ทันที ไม่ต้องติดตั้งอะไร ขับเคลื่อนด้วย Gemini Flash',
+    tags: ['Free', 'Cloud', 'Instant'],
+    size: '—',
+    license: 'Rnai.io',
+    status: 'featured',
+    icon: '✨',
+    color: ['#9333EA', '#6D28D9'] as [string, string],
+    url: 'https://rnai-io.vercel.app',
+    ollamaTag: undefined as string | undefined,
+  },
+  {
     id: 'deepseek-r1',
     name: 'DeepSeek R1',
     param: '7B',
     provider: 'DeepSeek',
     description: 'Powerful open-source reasoning model. Excels at math, code, and complex thinking.',
+    descriptionTh: 'โมเดลโอเพนซอร์สสายคิดวิเคราะห์ เก่งคณิตศาสตร์ โค้ด และการคิดซับซ้อน',
     tags: ['Reasoning', 'Code', 'Math'],
     size: '4.7 GB',
     license: 'MIT',
-    status: 'featured',
+    status: 'available',
     icon: '🧠',
     color: ['#0EA5E9', '#0284C7'] as [string, string],
     url: 'https://github.com/deepseek-ai/DeepSeek-R1',
+    ollamaTag: 'deepseek-r1' as string | undefined,
   },
   {
     id: 'ollama',
@@ -50,6 +70,7 @@ const AI_MODELS = [
     param: 'Any',
     provider: 'Ollama',
     description: 'Run any open-source model locally on your Mac/PC. Connect from this device via LAN.',
+    descriptionTh: 'รันโมเดลโอเพนซอร์สบน Mac/PC ของคุณเอง แล้วเชื่อมต่อจากมือถือผ่าน WiFi บ้าน',
     tags: ['Local', 'Privacy', 'Custom'],
     size: '—',
     license: 'MIT',
@@ -57,6 +78,7 @@ const AI_MODELS = [
     icon: '🦙',
     color: ['#10B981', '#059669'] as [string, string],
     url: 'https://ollama.ai',
+    ollamaTag: undefined as string | undefined,
   },
   {
     id: 'llama3',
@@ -64,6 +86,7 @@ const AI_MODELS = [
     param: '3B',
     provider: 'Meta',
     description: "Meta's latest mobile-optimized LLM. Fast and capable on-device inference.",
+    descriptionTh: 'LLM รุ่นล่าสุดจาก Meta ปรับแต่งมาเพื่ออุปกรณ์พกพา เร็วและเก่ง',
     tags: ['Chat', 'Mobile', 'Fast'],
     size: '2.0 GB',
     license: 'Llama 3',
@@ -71,6 +94,7 @@ const AI_MODELS = [
     icon: '🦙',
     color: ['#8B5CF6', '#6D28D9'] as [string, string],
     url: 'https://llama.meta.com',
+    ollamaTag: 'llama3.2' as string | undefined,
   },
   {
     id: 'gemma2',
@@ -78,6 +102,7 @@ const AI_MODELS = [
     param: '2B',
     provider: 'Google',
     description: "Google's lightweight open model. Great multilingual support and efficiency.",
+    descriptionTh: 'โมเดลเปิดน้ำหนักเบาจาก Google รองรับหลายภาษาและประหยัดทรัพยากร',
     tags: ['Efficient', 'Multilingual', 'Chat'],
     size: '1.6 GB',
     license: 'Gemma',
@@ -85,6 +110,7 @@ const AI_MODELS = [
     icon: '💎',
     color: ['#F59E0B', '#D97706'] as [string, string],
     url: 'https://ai.google.dev/gemma',
+    ollamaTag: 'gemma2:2b' as string | undefined,
   },
   {
     id: 'phi3',
@@ -92,6 +118,7 @@ const AI_MODELS = [
     param: '3.8B',
     provider: 'Microsoft',
     description: "Microsoft's small but mighty model. Best-in-class for its size.",
+    descriptionTh: 'โมเดลเล็กพริกขี้หนูจาก Microsoft ดีที่สุดในรุ่นขนาดเดียวกัน',
     tags: ['Fast', 'Code', 'Reasoning'],
     size: '2.3 GB',
     license: 'MIT',
@@ -99,6 +126,7 @@ const AI_MODELS = [
     icon: '⚡',
     color: ['#3B82F6', '#1D4ED8'] as [string, string],
     url: 'https://azure.microsoft.com/en-us/blog/phi-3',
+    ollamaTag: 'phi3' as string | undefined,
   },
   {
     id: 'mistral',
@@ -106,6 +134,7 @@ const AI_MODELS = [
     param: '7B',
     provider: 'Mistral AI',
     description: 'Top open-source 7B model. Excellent for instruction following and code.',
+    descriptionTh: 'โมเดลโอเพนซอร์ส 7B ระดับท็อป เก่งการทำตามคำสั่งและเขียนโค้ด',
     tags: ['General', 'Code', 'Instruct'],
     size: '4.1 GB',
     license: 'Apache 2.0',
@@ -113,29 +142,20 @@ const AI_MODELS = [
     icon: '🌊',
     color: ['#EC4899', '#DB2777'] as [string, string],
     url: 'https://mistral.ai',
+    ollamaTag: 'mistral' as string | undefined,
   },
 ];
-
-// ── Wallet Tokens ─────────────────────────────────────────────────────────
-
-const WALLET_TOKENS = [
-  { symbol: 'ETH',  name: 'Ethereum',     icon: '⟠',  color: '#627EEA', balance: '—', usd: '—' },
-  { symbol: 'BTC',  name: 'Bitcoin',      icon: '₿',  color: '#F7931A', balance: '—', usd: '—' },
-  { symbol: 'USDT', name: 'Tether USD',   icon: '₮',  color: '#26A17B', balance: '—', usd: '—' },
-  { symbol: 'USDC', name: 'USD Coin',     icon: '$',  color: '#2775CA', balance: '—', usd: '—' },
-  { symbol: 'RNAI', name: 'Rnai Token',   icon: '⚡', color: '#9333EA', balance: '—', usd: '— (Future)' },
-];
-
-// ── Mock wallet address ───────────────────────────────────────────────────
-const MOCK_ADDRESS = '0x71C7...A4F2';
-const MOCK_ADDRESS_FULL = '0x71C7656EC7ab88b098defB751B7401B5f6d8976F';
 
 // ── Main Screen ───────────────────────────────────────────────────────────
 
 export default function AiManagerScreen() {
   const insets = useSafeAreaInsets();
   const { colors, scheme } = useTheme();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+  const { user: authUser } = useAuth();
+  const isTh = lang === 'th';
+  const modelDesc = (m: typeof AI_MODELS[number]) =>
+    isTh && (m as any).descriptionTh ? (m as any).descriptionTh : m.description;
   const isVibrant = scheme === 'vibrant';
   const AI = t.aiManager; // shorthand
 
@@ -150,10 +170,49 @@ export default function AiManagerScreen() {
   const [detailModel, setDetailModel] = useState(AI_MODELS[0]);
   const [chatInput, setChatInput] = useState('');
   const [chatMessages, setChatMessages] = useState<{ role: 'user' | 'ai'; text: string }[]>([
-    { role: 'ai', text: `${AI_MODELS[0].name}` },
+    {
+      role: 'ai',
+      text: isTh
+        ? '✨ Rnai Cloud Chat — แชท AI ฟรีสำหรับสมาชิก พิมพ์ข้อความด้านล่างได้เลย!'
+        : '✨ Rnai Cloud Chat — free AI chat for members. Type a message below to start!',
+    },
   ]);
   const [chatLoading, setChatLoading] = useState(false);
-  const [showWalletModal, setShowWalletModal] = useState(false);
+
+  // ── Real wallet data (credits + ledger from the platform) ──
+  const [walletBilling, setWalletBilling] = useState<{ free: number; paid: number } | null>(null);
+  const [ledgerEntries, setLedgerEntries] = useState<LedgerEntry[]>([]);
+  const [rnaiPoints, setRnaiPoints] = useState(0);
+  const [myRank, setMyRank] = useState<MyRank | null>(null);
+  const [walletLoading, setWalletLoading] = useState(false);
+
+  const loadWallet = React.useCallback(async () => {
+    if (!authUser) { setWalletBilling(null); setLedgerEntries([]); setRnaiPoints(0); setMyRank(null); return; }
+    setWalletLoading(true);
+    try {
+      const [billing, ledger, rank] = await Promise.all([fetchBilling(), fetchLedger(25), fetchMyRank()]);
+      if (billing) setWalletBilling({ free: billing.freeCreditsRemaining, paid: billing.paidCreditsBalance });
+      if (ledger) { setLedgerEntries(ledger.entries); setRnaiPoints(ledger.lifetimeSpent); }
+      setMyRank(rank);
+    } finally {
+      setWalletLoading(false);
+    }
+  }, [authUser]);
+
+  React.useEffect(() => {
+    if (activeTab === 'wallet') loadWallet();
+  }, [activeTab, loadWallet]);
+
+  const ledgerMeta = (type: string): { icon: string; label: string } => {
+    switch (type) {
+      case 'free_grant': return { icon: '🎁', label: isTh ? 'โบนัสสมัครสมาชิก' : 'Signup bonus' };
+      case 'charge':     return { icon: '⚡', label: isTh ? 'ใช้สร้างผลงาน' : 'Generation' };
+      case 'refund':     return { icon: '↩️', label: isTh ? 'คืนเครดิต' : 'Refund' };
+      case 'topup':      return { icon: '💳', label: isTh ? 'เติมเครดิต' : 'Top up' };
+      case 'reward':     return { icon: '🏆', label: isTh ? 'รางวัลประจำเดือน' : 'Monthly reward' };
+      default:           return { icon: '•', label: type };
+    }
+  };
 
   const gradientBg: [string, string, string] = isVibrant
     ? [colors.gradient[0], colors.gradient[1], colors.gradient[2]]
@@ -167,36 +226,55 @@ export default function AiManagerScreen() {
     setChatMessages(history);
     setChatLoading(true);
 
-    if (selectedModel.id === 'ollama' && ollamaConnected && ollamaModelName) {
-      // ── Real inference via local Ollama server ──
-      try {
+    try {
+      // ── 1. Rnai Cloud (Gemini) — free, works instantly when signed in ──
+      if (selectedModel.id === 'rnai-gemini') {
+        if (!authUser) {
+          setChatMessages(prev => [...prev, {
+            role: 'ai',
+            text: lang === 'th'
+              ? '🔐 เข้าสู่ระบบก่อนเพื่อใช้แชทคลาวด์ฟรี — ไปที่ โปรไฟล์ > API Key'
+              : '🔐 Sign in to use free cloud chat — go to Profile > API Key.',
+          }]);
+          return;
+        }
+        const reply = await geminiChat(text);
+        setChatMessages(prev => [...prev, { role: 'ai', text: reply }]);
+        return;
+      }
+
+      // ── 2. Local inference via Ollama (selected model's tag, or default) ──
+      const ollamaModel = selectedModel.id === 'ollama'
+        ? ollamaModelName
+        : (selectedModel as any).ollamaTag as string | undefined;
+      if (ollamaConnected && ollamaModel) {
         const reply = await ollamaChat(
           ollamaUrl,
-          ollamaModelName,
+          ollamaModel,
           history.map(m => ({
             role: m.role === 'ai' ? 'assistant' as const : 'user' as const,
             content: m.text,
           })),
         );
         setChatMessages(prev => [...prev, { role: 'ai', text: reply }]);
-      } catch (err: any) {
-        setChatMessages(prev => [...prev, {
-          role: 'ai',
-          text: `⚠️ ${err?.message ?? 'Could not reach Ollama. Check that the server is running and on the same WiFi.'}`,
-        }]);
-      } finally {
-        setChatLoading(false);
+        return;
       }
-      return;
-    }
 
-    // ── Demo response for models not yet connected ──
-    await new Promise(r => setTimeout(r, 1200));
-    setChatMessages(prev => [...prev, {
-      role: 'ai',
-      text: `[${selectedModel.name}] ${AI?.demoResponse ?? 'This is a demo response. Connect to Ollama or download a model to get real AI responses.'}`,
-    }]);
-    setChatLoading(false);
+      // ── 3. Not connected — guide the user instead of a fake reply ──
+      setChatMessages(prev => [...prev, {
+        role: 'ai',
+        text: lang === 'th'
+          ? `💡 โมเดล ${selectedModel.name} ทำงานผ่าน Ollama บนคอมพิวเตอร์ของคุณ — เชื่อมต่อ Ollama ก่อน (กดการ์ด Ollama) หรือสลับไปใช้ ✨ Rnai Cloud Chat ที่ใช้ได้ฟรีทันที`
+          : `💡 ${selectedModel.name} runs via Ollama on your computer — connect Ollama first (tap the Ollama card), or switch to ✨ Rnai Cloud Chat which works instantly for free.`,
+      }]);
+    } catch (err: any) {
+      setChatMessages(prev => [...prev, {
+        role: 'ai',
+        text: `⚠️ ${err?.message ?? (lang === 'th' ? 'เกิดข้อผิดพลาด ลองใหม่อีกครั้ง' : 'Something went wrong — please try again.')}`,
+      }]);
+    } finally {
+      setChatLoading(false);
+    }
   };
 
   const card = (children: React.ReactNode, style?: object) => (
@@ -478,7 +556,7 @@ export default function AiManagerScreen() {
                         )}
                       </View>
                       <Text style={{ color: colors.text.secondary, ...TYPOGRAPHY.caption, marginTop: 2 }} numberOfLines={1}>
-                        {model.description}
+                        {modelDesc(model)}
                       </Text>
                       <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4, gap: SPACING.sm }}>
                         <Text style={{ color: colors.text.tertiary, fontSize: 11 }}>{model.provider}</Text>
@@ -497,7 +575,12 @@ export default function AiManagerScreen() {
                       <TouchableOpacity
                         onPress={() => {
                           setSelectedModel(model);
-                          setChatMessages([{ role: 'ai', text: `Hello! I'm ${model.name}. How can I help you?` }]);
+                          setChatMessages([{
+                            role: 'ai',
+                            text: isTh
+                              ? `สวัสดีครับ! ผมคือ ${model.name} มีอะไรให้ช่วยไหมครับ?`
+                              : `Hello! I'm ${model.name}. How can I help you?`,
+                          }]);
                         }}
                         style={{
                           backgroundColor: isActive ? model.color[0] : `${model.color[0]}15`,
@@ -506,7 +589,7 @@ export default function AiManagerScreen() {
                         }}
                       >
                         <Text style={{ color: isActive ? '#FFF' : model.color[0], fontSize: 11, fontWeight: '700' }}>
-                          {isActive ? '✓ Active' : 'Use'}
+                          {isActive ? (isTh ? '✓ ใช้อยู่' : '✓ Active') : (isTh ? 'ใช้' : 'Use')}
                         </Text>
                       </TouchableOpacity>
                     </View>
@@ -522,24 +605,22 @@ export default function AiManagerScreen() {
           {activeTab === 'wallet' && (
             <View style={{ paddingHorizontal: LAYOUT.screenPadding }}>
 
-              {/* Legal Disclaimer */}
-              <View style={{
-                backgroundColor: `${colors.warning ?? '#F59E0B'}15`,
-                borderRadius: 14, padding: SPACING.lg,
-                borderWidth: 1, borderColor: `${colors.warning ?? '#F59E0B'}40`,
-                marginBottom: SPACING.xl,
-                flexDirection: 'row', gap: SPACING.md,
-              }}>
-                <Ionicons name="information-circle-outline" size={20} color={colors.warning ?? '#F59E0B'} style={{ flexShrink: 0, marginTop: 1 }} />
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: colors.warning ?? '#F59E0B', ...TYPOGRAPHY.caption, fontWeight: '800', marginBottom: 3 }}>
-                    Development Preview
-                  </Text>
-                  <Text style={{ color: colors.text.secondary, ...TYPOGRAPHY.caption, lineHeight: 17 }}>
-                    Wallet features shown below are for display purposes. Actual transactions (send/receive/swap) require identity verification (KYC/AML) and regulatory compliance before activation.
+              {/* Guest notice */}
+              {!authUser && (
+                <View style={{
+                  backgroundColor: `${colors.primary}10`,
+                  borderRadius: 14, padding: SPACING.lg,
+                  marginBottom: SPACING.xl,
+                  flexDirection: 'row', gap: SPACING.md, alignItems: 'center',
+                }}>
+                  <Ionicons name="lock-closed-outline" size={20} color={colors.primary} />
+                  <Text style={{ flex: 1, color: colors.text.secondary, ...TYPOGRAPHY.caption, lineHeight: 17 }}>
+                    {isTh
+                      ? 'เข้าสู่ระบบเพื่อดูเครดิต คะแนนสะสม และประวัติธุรกรรมของคุณ — ไปที่ โปรไฟล์ > API Key'
+                      : 'Sign in to see your credits, reward points, and transaction history — go to Profile > API Key.'}
                   </Text>
                 </View>
-              </View>
+              )}
 
               {/* Wallet Card */}
               <LinearGradient
@@ -561,7 +642,7 @@ export default function AiManagerScreen() {
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: SPACING.xxl }}>
                   <View>
                     <Text style={{ color: 'rgba(255,255,255,0.55)', fontSize: 11, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 1 }}>
-                      My Wallet
+                      {isTh ? 'กระเป๋าของฉัน' : 'My Wallet'}
                     </Text>
                     <Text style={{ color: '#FFF', ...TYPOGRAPHY.headline, fontSize: 18, fontWeight: '800', marginTop: 2 }}>
                       Rnai Wallet
@@ -576,17 +657,26 @@ export default function AiManagerScreen() {
                 </View>
 
                 <Text style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, marginBottom: 6, fontWeight: '600', letterSpacing: 1 }}>
-                  WALLET ADDRESS
+                  {isTh ? 'เครดิตคงเหลือ' : 'CREDIT BALANCE'}
                 </Text>
-                <Text style={{ color: '#FFF', fontSize: 13, fontWeight: '700', letterSpacing: 0.5, marginBottom: SPACING.xl }}>
-                  {MOCK_ADDRESS_FULL}
+                <Text style={{ color: '#FFF', fontSize: 34, fontWeight: '800', lineHeight: 40 }}>
+                  {walletLoading && !walletBilling
+                    ? '...'
+                    : walletBilling
+                    ? (walletBilling.free + walletBilling.paid).toLocaleString()
+                    : '—'}
+                </Text>
+                <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 12, marginTop: 4, marginBottom: SPACING.xl }}>
+                  {walletBilling
+                    ? `${isTh ? 'ฟรี' : 'Free'} ${walletBilling.free.toLocaleString()} · ${isTh ? 'เติม' : 'Paid'} ${walletBilling.paid.toLocaleString()}${authUser ? ` · ${authUser.email}` : ''}`
+                    : (isTh ? 'ยังไม่ได้เข้าสู่ระบบ' : 'Not signed in')}
                 </Text>
 
                 <View style={{ flexDirection: 'row', gap: SPACING.md }}>
                   {[
-                    { icon: 'qr-code-outline', label: AI?.wallet?.receive ?? 'Receive', onPress: () => setShowWalletModal(true) },
-                    { icon: 'arrow-up-outline',  label: AI?.wallet?.send ?? 'Send',    onPress: () => Alert.alert('KYC Required', 'Send features will be available after identity verification. Coming soon.') },
-                    { icon: 'swap-horizontal',   label: AI?.wallet?.comingSoon ?? 'Swap',    onPress: () => Alert.alert(AI?.wallet?.comingSoon ?? 'Coming Soon', 'Token swap will be available in a future release.') },
+                    { icon: 'card-outline', label: isTh ? 'เติมเครดิต' : 'Top up', onPress: () => Linking.openURL('https://rnai-io.vercel.app/dashboard/billing').catch(() => {}) },
+                    { icon: 'refresh-outline', label: isTh ? 'รีเฟรช' : 'Refresh', onPress: loadWallet },
+                    { icon: 'globe-outline', label: isTh ? 'แดชบอร์ด' : 'Dashboard', onPress: () => Linking.openURL('https://rnai-io.vercel.app/dashboard').catch(() => {}) },
                   ].map(btn => (
                     <TouchableOpacity
                       key={btn.label}
@@ -600,57 +690,143 @@ export default function AiManagerScreen() {
                 </View>
               </LinearGradient>
 
-              {/* Token Balances */}
-              <Text style={{ color: isVibrant ? colors.primary : colors.text.primary, fontSize: 18, fontWeight: '800', marginBottom: SPACING.lg }}>
-                {AI?.wallet?.assets ?? 'Supported Tokens'}
-              </Text>
-
-              {WALLET_TOKENS.map((token, i) => (
-                <View
-                  key={token.symbol}
-                  style={{
-                    flexDirection: 'row', alignItems: 'center',
-                    backgroundColor: colors.surface,
-                    borderRadius: isVibrant ? 16 : 12,
-                    padding: SPACING.lg, marginBottom: SPACING.sm,
-                    ...(isVibrant ? {
-                      shadowColor: colors.cardShadow,
-                      shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.07, shadowRadius: 8, elevation: 3,
-                    } : { borderWidth: 1, borderColor: colors.borders }),
-                  }}
-                >
-                  <View style={{
-                    width: 44, height: 44, borderRadius: 22,
-                    backgroundColor: `${token.color}20`,
-                    justifyContent: 'center', alignItems: 'center', marginRight: SPACING.lg,
-                  }}>
-                    <Text style={{ color: token.color, fontSize: 18, fontWeight: '800' }}>{token.icon}</Text>
-                  </View>
+              {/* RNAI Reward Points — tap to open the rewards page */}
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => Linking.openURL('https://rnai-io.vercel.app/rewards').catch(() => {})}
+                style={{
+                  backgroundColor: colors.surface,
+                  borderRadius: isVibrant ? 18 : 12,
+                  padding: SPACING.lg, marginBottom: SPACING.xl,
+                  ...(isVibrant ? {
+                    shadowColor: '#9333EA',
+                    shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.12, shadowRadius: 10, elevation: 4,
+                  } : { borderWidth: 1, borderColor: colors.borders }),
+                }}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <LinearGradient
+                    colors={['#9333EA', '#7C3AED']}
+                    style={{ width: 48, height: 48, borderRadius: 14, justifyContent: 'center', alignItems: 'center', marginRight: SPACING.lg }}
+                  >
+                    <Text style={{ fontSize: 22 }}>⚡</Text>
+                  </LinearGradient>
                   <View style={{ flex: 1 }}>
-                    <Text style={{ color: colors.text.primary, ...TYPOGRAPHY.headline }}>{token.symbol}</Text>
-                    <Text style={{ color: colors.text.secondary, ...TYPOGRAPHY.caption }}>{token.name}</Text>
-                  </View>
-                  <View style={{ alignItems: 'flex-end' }}>
-                    <Text style={{ color: colors.text.primary, ...TYPOGRAPHY.headline }}>—</Text>
-                    <Text style={{ color: colors.text.tertiary, ...TYPOGRAPHY.caption, marginTop: 2 }}>
-                      {token.symbol === 'RNAI' ? 'Future Token' : 'Connect wallet'}
+                    <Text style={{ color: colors.text.primary, ...TYPOGRAPHY.headline }}>RNAI Points</Text>
+                    <Text style={{ color: colors.text.secondary, ...TYPOGRAPHY.caption }}>
+                      {isTh ? 'สะสมจากการสร้างผลงาน' : 'Earned by creating'}
                     </Text>
                   </View>
+                  <Text style={{ color: '#9333EA', fontSize: 22, fontWeight: '800' }}>
+                    {rnaiPoints.toLocaleString()}
+                  </Text>
                 </View>
-              ))}
+                <View style={{
+                  flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
+                  marginTop: SPACING.md, paddingTop: SPACING.md,
+                  borderTopWidth: 1, borderTopColor: colors.borders,
+                }}>
+                  <Text style={{ fontSize: 13 }}>🏆</Text>
+                  <Text style={{ ...TYPOGRAPHY.caption, color: '#9333EA', fontWeight: '700' }}>
+                    {myRank?.rank
+                      ? (isTh
+                          ? `อันดับของคุณเดือนนี้: #${myRank.rank} — ดูกติกาและรางวัล`
+                          : `Your rank this month: #${myRank.rank} — see rules & rewards`)
+                      : (isTh
+                          ? 'ลุ้น 10 รางวัล/เดือน · 20 รางวัลใหญ่/ปี — ดูกติกาและรางวัล'
+                          : '10 monthly · 20 yearly prizes — see rules & rewards')}
+                  </Text>
+                  <Ionicons name="chevron-forward" size={14} color="#9333EA" />
+                </View>
+              </TouchableOpacity>
+
+              {/* Transaction history (real ledger from the platform) */}
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: SPACING.lg }}>
+                <Text style={{ color: isVibrant ? colors.primary : colors.text.primary, fontSize: 18, fontWeight: '800' }}>
+                  📒 {isTh ? 'ประวัติธุรกรรม' : 'Transactions'}
+                </Text>
+                {walletLoading && <ActivityIndicator size="small" color={colors.primary} />}
+              </View>
+
+              {ledgerEntries.length === 0 && !walletLoading && (
+                <View style={{
+                  backgroundColor: colors.surface, borderRadius: isVibrant ? 16 : 12,
+                  padding: SPACING.xl, alignItems: 'center', marginBottom: SPACING.sm,
+                  ...(isVibrant ? {} : { borderWidth: 1, borderColor: colors.borders }),
+                }}>
+                  <Text style={{ fontSize: 28, marginBottom: SPACING.sm }}>🧾</Text>
+                  <Text style={{ color: colors.text.secondary, ...TYPOGRAPHY.caption, textAlign: 'center' }}>
+                    {authUser
+                      ? (isTh ? 'ยังไม่มีธุรกรรม — ลองสร้างผลงานแรกของคุณเลย!' : 'No transactions yet — create your first piece!')
+                      : (isTh ? 'เข้าสู่ระบบเพื่อดูประวัติ' : 'Sign in to see your history')}
+                  </Text>
+                </View>
+              )}
+
+              {ledgerEntries.map(entry => {
+                const meta = ledgerMeta(entry.type);
+                const positive = entry.credits >= 0;
+                const when = entry.createdAt
+                  ? new Date(entry.createdAt).toLocaleString(isTh ? 'th-TH' : 'en-US', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+                  : '';
+                return (
+                  <View
+                    key={entry.id}
+                    style={{
+                      flexDirection: 'row', alignItems: 'center',
+                      backgroundColor: colors.surface,
+                      borderRadius: isVibrant ? 16 : 12,
+                      padding: SPACING.lg, marginBottom: SPACING.sm,
+                      ...(isVibrant ? {
+                        shadowColor: colors.cardShadow,
+                        shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.07, shadowRadius: 8, elevation: 3,
+                      } : { borderWidth: 1, borderColor: colors.borders }),
+                    }}
+                  >
+                    <View style={{
+                      width: 44, height: 44, borderRadius: 22,
+                      backgroundColor: positive ? `${colors.success ?? '#10B981'}18` : `${colors.primary}12`,
+                      justifyContent: 'center', alignItems: 'center', marginRight: SPACING.lg,
+                    }}>
+                      <Text style={{ fontSize: 18 }}>{meta.icon}</Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ color: colors.text.primary, ...TYPOGRAPHY.headline }}>{meta.label}</Text>
+                      <Text style={{ color: colors.text.tertiary, ...TYPOGRAPHY.caption, marginTop: 2 }}>{when}</Text>
+                    </View>
+                    <View style={{ alignItems: 'flex-end' }}>
+                      <Text style={{
+                        ...TYPOGRAPHY.headline,
+                        color: positive ? (colors.success ?? '#10B981') : colors.text.primary,
+                      }}>
+                        {positive ? '+' : ''}{entry.credits.toLocaleString()}
+                      </Text>
+                      <Text style={{ color: colors.text.tertiary, ...TYPOGRAPHY.caption, marginTop: 2 }}>
+                        {isTh ? 'คงเหลือ' : 'bal.'} {entry.balanceAfter.toLocaleString()}
+                      </Text>
+                    </View>
+                  </View>
+                );
+              })}
 
               {/* Future Roadmap */}
               <Text style={{ color: isVibrant ? colors.primary : colors.text.primary, fontSize: 18, fontWeight: '800', marginTop: SPACING.xl, marginBottom: SPACING.lg }}>
-                🗺️ Roadmap
+                🗺️ {isTh ? 'แผนพัฒนา' : 'Roadmap'}
               </Text>
 
-              {[
+              {(isTh ? [
+                { phase: 'Phase 1', title: 'ศูนย์จัดการโมเดล AI', desc: 'เลือก เชื่อมต่อ และแชทกับโมเดลโอเพนซอร์ส', status: 'live', icon: '🤖' },
+                { phase: 'Phase 2', title: 'กระเป๋าเครดิตและคะแนน', desc: 'ยอดเครดิตจริง คะแนน RNAI และประวัติธุรกรรม', status: 'live', icon: '👁️' },
+                { phase: 'Phase 3', title: 'รับโทเค็น', desc: 'รับชำระคริปโตผ่าน QR — ต้องยืนยันตัวตนขั้นพื้นฐาน', status: 'soon', icon: '📥' },
+                { phase: 'Phase 4', title: 'ส่งและโอน', desc: 'รองรับธุรกรรมเต็มรูปแบบ — ต้องผ่าน KYC/AML', status: 'future', icon: '📤' },
+                { phase: 'Phase 5', title: 'โทเค็น Rnai (RNAI)', desc: 'โทเค็นประจำแพลตฟอร์ม — สร้างผลงานเพื่อรับรางวัล', status: 'future', icon: '⚡' },
+              ] : [
                 { phase: 'Phase 1', title: 'AI Model Manager', desc: 'Browse, connect, and chat with open-source models', status: 'live', icon: '🤖' },
-                { phase: 'Phase 2', title: 'Wallet Display', desc: 'View address, QR code, and token balances', status: 'preview', icon: '👁️' },
+                { phase: 'Phase 2', title: 'Credit Wallet & Points', desc: 'Real credit balance, RNAI points, and transaction history', status: 'live', icon: '👁️' },
                 { phase: 'Phase 3', title: 'Receive Tokens', desc: 'Accept crypto payments via QR — requires basic KYC', status: 'soon', icon: '📥' },
                 { phase: 'Phase 4', title: 'Send & Transfer', desc: 'Full transaction support — requires full KYC/AML', status: 'future', icon: '📤' },
                 { phase: 'Phase 5', title: 'Rnai Token (RNAI)', desc: 'Platform utility token — earn by creating content', status: 'future', icon: '⚡' },
-              ].map(item => (
+              ]).map(item => (
                 <View key={item.phase} style={{
                   flexDirection: 'row', gap: SPACING.md,
                   marginBottom: SPACING.md,
@@ -685,7 +861,7 @@ export default function AiManagerScreen() {
                             : item.status === 'soon' ? colors.warning ?? '#F59E0B'
                             : colors.text.tertiary,
                         }}>
-                          {item.status === 'live' ? '✓ LIVE' : item.status === 'preview' ? 'PREVIEW' : item.status === 'soon' ? 'Q3 2026' : 'FUTURE'}
+                          {item.status === 'live' ? (isTh ? '✓ ใช้งานได้' : '✓ LIVE') : item.status === 'preview' ? (isTh ? 'ตัวอย่าง' : 'PREVIEW') : item.status === 'soon' ? 'Q3 2026' : (isTh ? 'อนาคต' : 'FUTURE')}
                         </Text>
                       </View>
                     </View>
@@ -719,14 +895,18 @@ export default function AiManagerScreen() {
               backgroundColor: `${colors.primary}10`, borderRadius: 14, padding: SPACING.lg,
               marginBottom: SPACING.xl,
             }}>
-              <Text style={{ color: colors.primary, ...TYPOGRAPHY.caption, fontWeight: '700', marginBottom: 4 }}>What is Ollama?</Text>
+              <Text style={{ color: colors.primary, ...TYPOGRAPHY.caption, fontWeight: '700', marginBottom: 4 }}>
+                {isTh ? 'Ollama คืออะไร?' : 'What is Ollama?'}
+              </Text>
               <Text style={{ color: colors.text.secondary, ...TYPOGRAPHY.caption, lineHeight: 18 }}>
-                Ollama lets you run powerful AI models (Llama, Mistral, DeepSeek, etc.) locally on your Mac or PC. Connect this app to your local Ollama server over your home WiFi for private, free AI.
+                {isTh
+                  ? 'Ollama ให้คุณรันโมเดล AI ทรงพลัง (Llama, Mistral, DeepSeek ฯลฯ) บน Mac หรือ PC ของตัวเอง แล้วเชื่อมแอปนี้เข้ากับเครื่องผ่าน WiFi บ้าน — ได้ AI ส่วนตัว ฟรี และเป็นความลับ'
+                  : 'Ollama lets you run powerful AI models (Llama, Mistral, DeepSeek, etc.) locally on your Mac or PC. Connect this app to your local Ollama server over your home WiFi for private, free AI.'}
               </Text>
             </View>
 
             <Text style={{ color: colors.text.secondary, ...TYPOGRAPHY.caption, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1, marginBottom: SPACING.sm }}>
-              Ollama Server URL
+              {isTh ? 'ที่อยู่เซิร์ฟเวอร์ Ollama' : 'Ollama Server URL'}
             </Text>
             <TextInput
               value={ollamaUrl}
@@ -756,16 +936,22 @@ export default function AiManagerScreen() {
                   setChatMessages([{
                     role: 'ai',
                     text: firstModel
-                      ? `✅ Connected to Ollama (${models.length} model${models.length === 1 ? '' : 's'}). Using "${firstModel}" — type a message to start!`
-                      : `✅ Connected to Ollama, but no models installed. Run "ollama pull llama3.2" on your computer first.`,
+                      ? (isTh
+                          ? `✅ เชื่อมต่อ Ollama สำเร็จ (มี ${models.length} โมเดล) กำลังใช้ "${firstModel}" — พิมพ์ข้อความเริ่มคุยได้เลย!`
+                          : `✅ Connected to Ollama (${models.length} model${models.length === 1 ? '' : 's'}). Using "${firstModel}" — type a message to start!`)
+                      : (isTh
+                          ? '✅ เชื่อมต่อ Ollama ได้ แต่ยังไม่มีโมเดลติดตั้ง — รัน "ollama pull llama3.2" บนคอมพิวเตอร์ก่อนครับ'
+                          : '✅ Connected to Ollama, but no models installed. Run "ollama pull llama3.2" on your computer first.'),
                   }]);
                   setShowOllamaModal(false);
                 } catch (err: any) {
                   setOllamaConnected(false);
                   setOllamaModelName(null);
                   Alert.alert(
-                    'Connection Failed',
-                    `Could not reach Ollama at ${ollamaUrl}.\n\nMake sure:\n• Ollama is running on your computer\n• Both devices are on the same WiFi\n• The IP address is correct\n\n(${err?.message ?? 'unknown error'})`,
+                    isTh ? 'เชื่อมต่อไม่สำเร็จ' : 'Connection Failed',
+                    isTh
+                      ? `ติดต่อ Ollama ที่ ${ollamaUrl} ไม่ได้\n\nตรวจสอบว่า:\n• Ollama กำลังรันบนคอมพิวเตอร์\n• ทั้งสองเครื่องอยู่ WiFi เดียวกัน\n• IP address ถูกต้อง\n\n(${err?.message ?? 'unknown error'})`
+                      : `Could not reach Ollama at ${ollamaUrl}.\n\nMake sure:\n• Ollama is running on your computer\n• Both devices are on the same WiFi\n• The IP address is correct\n\n(${err?.message ?? 'unknown error'})`,
                   );
                 } finally {
                   setOllamaConnecting(false);
@@ -787,15 +973,21 @@ export default function AiManagerScreen() {
             </TouchableOpacity>
 
             <Text style={{ color: colors.text.secondary, ...TYPOGRAPHY.headline, fontSize: 16, fontWeight: '700', marginTop: SPACING.xxl, marginBottom: SPACING.lg }}>
-              Setup Guide
+              {isTh ? 'วิธีติดตั้ง' : 'Setup Guide'}
             </Text>
-            {[
+            {(isTh ? [
+              { step: '1', text: 'ติดตั้ง Ollama จาก ollama.ai บน Mac/PC ของคุณ' },
+              { step: '2', text: 'รันคำสั่ง: ollama pull llama3.2 (หรือโมเดลอื่น)' },
+              { step: '3', text: 'ให้มือถือกับคอมพิวเตอร์อยู่ WiFi เดียวกัน' },
+              { step: '4', text: 'หา IP ของคอมพิวเตอร์ (System Preferences → Network)' },
+              { step: '5', text: 'กรอก URL ด้านบนแล้วกดเชื่อมต่อ' },
+            ] : [
               { step: '1', text: 'Install Ollama from ollama.ai on your Mac/PC' },
               { step: '2', text: 'Run: ollama pull llama3.2 (or any model)' },
               { step: '3', text: 'Make sure your device is on the same WiFi' },
               { step: '4', text: 'Find your computer\'s local IP (System Preferences → Network)' },
               { step: '5', text: 'Enter the URL above and connect' },
-            ].map(item => (
+            ]).map(item => (
               <View key={item.step} style={{ flexDirection: 'row', gap: SPACING.md, marginBottom: SPACING.md }}>
                 <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: `${colors.primary}15`, justifyContent: 'center', alignItems: 'center', flexShrink: 0 }}>
                   <Text style={{ color: colors.primary, fontSize: 12, fontWeight: '800' }}>{item.step}</Text>
@@ -839,14 +1031,14 @@ export default function AiManagerScreen() {
 
           <ScrollView contentContainerStyle={{ padding: LAYOUT.screenPadding, paddingTop: 0 }}>
             <Text style={{ color: colors.text.secondary, ...TYPOGRAPHY.body, lineHeight: 24, marginBottom: SPACING.xl }}>
-              {detailModel.description}
+              {modelDesc(detailModel)}
             </Text>
 
             {[
-              { label: 'Parameters', value: detailModel.param },
-              { label: 'Provider', value: detailModel.provider },
-              { label: 'License', value: detailModel.license },
-              { label: 'Download Size', value: detailModel.size },
+              { label: isTh ? 'พารามิเตอร์' : 'Parameters', value: detailModel.param },
+              { label: isTh ? 'ผู้พัฒนา' : 'Provider', value: detailModel.provider },
+              { label: isTh ? 'สัญญาอนุญาต' : 'License', value: detailModel.license },
+              { label: isTh ? 'ขนาดดาวน์โหลด' : 'Download Size', value: detailModel.size },
             ].map(row => (
               <View key={row.label} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: SPACING.md, borderBottomWidth: 1, borderBottomColor: colors.borders }}>
                 <Text style={{ color: colors.text.secondary, ...TYPOGRAPHY.body }}>{row.label}</Text>
@@ -858,7 +1050,12 @@ export default function AiManagerScreen() {
               <TouchableOpacity
                 onPress={() => {
                   setSelectedModel(detailModel);
-                  setChatMessages([{ role: 'ai', text: `Switched to ${detailModel.name}. How can I help you?` }]);
+                  setChatMessages([{
+                    role: 'ai',
+                    text: isTh
+                      ? `สลับมาใช้ ${detailModel.name} แล้ว มีอะไรให้ช่วยไหมครับ?`
+                      : `Switched to ${detailModel.name}. How can I help you?`,
+                  }]);
                   setShowModelDetail(false);
                 }}
                 style={{
@@ -871,10 +1068,16 @@ export default function AiManagerScreen() {
                 <Text style={{ color: '#FFF', ...TYPOGRAPHY.callout, fontWeight: '700' }}>{AI?.modelConnected ?? 'Use This Model'}</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => Alert.alert('Download Model', `Download ${detailModel.name} (${detailModel.size}) to run offline on this device?\n\nNote: On-device inference requires a powerful processor and sufficient storage.`, [
-                  { text: 'Cancel', style: 'cancel' },
-                  { text: 'Learn More', onPress: () => {} },
-                ])}
+                onPress={() => Alert.alert(
+                  isTh ? 'ดาวน์โหลดโมเดล' : 'Download Model',
+                  isTh
+                    ? `ดาวน์โหลด ${detailModel.name} (${detailModel.size}) เพื่อรันออฟไลน์บนเครื่องนี้?\n\nหมายเหตุ: การรันบนอุปกรณ์ต้องใช้ชิปแรงและพื้นที่เพียงพอ — แนะนำให้ใช้ผ่าน Ollama บนคอมพิวเตอร์แทน`
+                    : `Download ${detailModel.name} (${detailModel.size}) to run offline on this device?\n\nNote: On-device inference requires a powerful processor and sufficient storage.`,
+                  [
+                    { text: t.common.cancel, style: 'cancel' },
+                    { text: isTh ? 'เรียนรู้เพิ่มเติม' : 'Learn More', onPress: () => {} },
+                  ],
+                )}
                 style={{
                   borderWidth: 1.5, borderColor: detailModel.color[0],
                   borderRadius: BORDER_RADIUS.full, paddingVertical: 15, alignItems: 'center',
@@ -889,51 +1092,6 @@ export default function AiManagerScreen() {
         </View>
       </Modal>
 
-      {/* ══════════════════════════════════════════════════════
-          Modal: Receive / QR
-      ══════════════════════════════════════════════════════ */}
-      <Modal visible={showWalletModal} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setShowWalletModal(false)}>
-        <View style={{ flex: 1, backgroundColor: colors.background, alignItems: 'center' }}>
-          <View style={{ alignItems: 'center', paddingTop: SPACING.lg, width: '100%' }}>
-            <View style={{ width: 40, height: 4, borderRadius: 2, backgroundColor: colors.borders }} />
-          </View>
-          <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between', alignItems: 'center', padding: LAYOUT.screenPadding }}>
-            <Text style={{ color: isVibrant ? colors.primary : colors.text.primary, ...TYPOGRAPHY.headline, fontSize: 20, fontWeight: '800' }}>
-              {AI?.wallet?.receive ?? 'Receive'}
-            </Text>
-            <TouchableOpacity onPress={() => setShowWalletModal(false)}>
-              <Ionicons name="close" size={24} color={colors.text.secondary} />
-            </TouchableOpacity>
-          </View>
-          <View style={{ paddingHorizontal: LAYOUT.screenPadding, width: '100%', alignItems: 'center' }}>
-            {/* QR Placeholder */}
-            <View style={{
-              width: 200, height: 200, borderRadius: 20,
-              backgroundColor: `${colors.primary}08`,
-              borderWidth: 2, borderColor: `${colors.primary}30`,
-              justifyContent: 'center', alignItems: 'center',
-              marginBottom: SPACING.xl,
-            }}>
-              <Ionicons name="qr-code" size={140} color={colors.primary} />
-            </View>
-            <Text style={{ color: colors.text.secondary, ...TYPOGRAPHY.caption, marginBottom: SPACING.sm, textAlign: 'center' }}>
-              Your Wallet Address
-            </Text>
-            <Text style={{ color: colors.text.primary, ...TYPOGRAPHY.body, fontWeight: '700', textAlign: 'center', marginBottom: SPACING.xl }}>
-              {MOCK_ADDRESS_FULL}
-            </Text>
-            <View style={{
-              backgroundColor: `${colors.warning ?? '#F59E0B'}12`,
-              borderRadius: 12, padding: SPACING.md,
-              borderWidth: 1, borderColor: `${colors.warning ?? '#F59E0B'}30`,
-            }}>
-              <Text style={{ color: colors.warning ?? '#F59E0B', ...TYPOGRAPHY.caption, textAlign: 'center', lineHeight: 17 }}>
-                ⚠️ {AI?.wallet?.displayOnly ?? 'Display only — actual wallet activation requires identity verification in a future release.'}
-              </Text>
-            </View>
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 }
