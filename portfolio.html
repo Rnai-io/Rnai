@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Creative Portfolio - Showcasing innovative AI-powered projects">
+    <title>Portfolio Website | Rnai Creator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+
+        /* Header & Navigation */
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 600;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #667eea;
+            transition: width 0.3s ease;
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        /* Hero Section */
+        .hero {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+            padding: 6rem 0;
+        }
+
+        .hero-content h1 {
+            font-size: 3.5rem;
+            font-weight: 900;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-content p {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 2rem;
+            line-height: 1.8;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: #f8f9ff;
+            transform: translateY(-2px);
+        }
+
+        .hero-visual {
+            position: relative;
+            height: 400px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .hero-visual::before {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(20px); }
+        }
+
+        .hero-text {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        /* Projects Section */
+        .projects {
+            padding: 6rem 0;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 3rem;
+            color: #222;
+        }
+
+        .project-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .project-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .project-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .project-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+        }
+
+        .project-content {
+            padding: 2rem;
+        }
+
+        .project-content h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #222;
+        }
+
+        .project-content p {
+            color: #666;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        .project-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+
+        .tag {
+            background: #f0f0f0;
+            color: #667eea;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .project-link {
+            color: #667eea;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: gap 0.3s ease;
+        }
+
+        .project-link:hover {
+            gap: 1rem;
+        }
+
+        /* Skills Section */
+        .skills {
+            padding: 6rem 0;
+            background: white;
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+        }
+
+        .skill-card {
+            text-align: center;
+            padding: 2rem;
+            background: #f8f9ff;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .skill-card:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            transform: translateY(-5px);
+        }
+
+        .skill-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .skill-card h3 {
+            font-size: 1.2rem;
+            color: #222;
+            margin-bottom: 0.5rem;
+        }
+
+        .skill-card p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* Stats Section */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            padding: 4rem 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            color: white;
+            text-align: center;
+        }
+
+        .stat-item h2 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* CTA Section */
+        .cta {
+            text-align: center;
+            padding: 6rem 0;
+        }
+
+        .cta h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: #222;
+        }
+
+        .cta p {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Footer */
+        footer {
+            background: #222;
+            color: white;
+            padding: 3rem 0;
+            text-align: center;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .social-links a {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .social-links a:hover {
+            background: #667eea;
+            transform: translateY(-3px);
+        }
+
+        footer p {
+            color: #999;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav ul {
+                gap: 1rem;
+            }
+
+            .hero {
+                grid-template-columns: 1fr;
+                padding: 3rem 0;
+            }
+
+            .hero-content h1 {
+                font-size: 2.2rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">⚡ Rnai</div>
+                <ul>
+                    <li><a href="#projects">Projects</a></li>
+                    <li><a href="#skills">Skills</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;">
+            <div class="hero-content">
+                <h1>สร้างงานสุดเจ๋ง<br>ด้วย AI</h1>
+                <p>ทำให้ความฝันของคุณเป็นจริง ด้วยเครื่องมือ AI ที่ทรงพลัง พร้อมสนับสนุนจากชุมชนผู้สร้าง</p>
+                <div class="btn-group">
+                    <button class="btn btn-primary">🚀 เริ่มสร้างเลย</button>
+                    <button class="btn btn-secondary">📚 ดูตัวอย่าง</button>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="hero-text">🎨 AI Powered</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section class="projects" id="projects">
+        <div class="container">
+            <h2 class="section-title">📁 โครงการล่าสุด</h2>
+            <div class="project-grid">
+                <!-- Project 1 -->
+                <div class="project-card">
+                    <div class="project-image">🎨</div>
+                    <div class="project-content">
+                        <h3>AI Image Generator</h3>
+                        <p>สร้างรูปภาพที่สวยงามจากคำอธิบายข้อความ ใช้เทคโนโลยี AI ล่าสุด</p>
+                        <div class="project-tags">
+                            <span class="tag">AI</span>
+                            <span class="tag">Image Gen</span>
+                            <span class="tag">Web</span>
+                        </div>
+                        <a href="#" class="project-link">ดูเพิ่มเติม →</a>
+                    </div>
+                </div>
+
+                <!-- Project 2 -->
+                <div class="project-card">
+                    <div class="project-image">📝</div>
+                    <div class="project-content">
+                        <h3>Smart Writer</h3>
+                        <p>ตัวช่วยเขียนข้อความอัจฉริยะ เพิ่มประสิทธิภาพการสื่อสารของคุณ</p>
+                        <div class="project-tags">
+                            <span class="tag">AI</span>
+                            <span class="tag">Writing</span>
+                            <span class="tag">Productivity</span>
+                        </div>
+                        <a href="#" class="project-link">ดูเพิ่มเติม →</a>
+                    </div>
+                </div>
+
+                <!-- Project 3 -->
+                <div class="project-card">
+                    <div class="project-image">🎬</div>
+                    <div class="project-content">
+                        <h3>Video Creator</h3>
+                        <p>สร้างวิดีโอปรสิตจากสคริปต์ ด้วย AI ในไม่กี่นาที</p>
+                        <div class="project-tags">
+                            <span class="tag">AI</span>
+                            <span class="tag">Video</span>
+                            <span class="tag">Automation</span>
+                        </div>
+                        <a href="#" class="project-link">ดูเพิ่มเติม →</a>
+                    </div>
+                </div>
+
+                <!-- Project 4 -->
+                <div class="project-card">
+                    <div class="project-image">🌐</div>
+                    <div class="project-content">
+                        <h3>Web Builder</h3>
+                        <p>สร้างเว็บไซต์มืออาชีพโดยไม่ต้องลงมือเขียนโค้ด</p>
+                        <div class="project-tags">
+                            <span class="tag">Web</span>
+                            <span class="tag">No-Code</span>
+                            <span class="tag">Builder</span>
+                        </div>
+                        <a href="#" class="project-link">ดูเพิ่มเติม →</a>
+                    </div>
+                </div>
+
+                <!-- Project 5 -->
+                <div class="project-card">
+                    <div class="project-image">🎵</div>
+                    <div class="project-content">
+                        <h3>AI Music Studio</h3>
+                        <p>สร้างเพลงดั้งเดิมด้วยเสียงที่เหมือนจริง และบีทที่ปรับแต่งได้</p>
+                        <div class="project-tags">
+                            <span class="tag">AI</span>
+                            <span class="tag">Music</span>
+                            <span class="tag">Audio</span>
+                        </div>
+                        <a href="#" class="project-link">ดูเพิ่มเติม →</a>
+                    </div>
+                </div>
+
+                <!-- Project 6 -->
+                <div class="project-card">
+                    <div class="project-image">💻</div>
+                    <div class="project-content">
+                        <h3>Code Assistant</h3>
+                        <p>ผู้ช่วยเขียนโค้ดอัจฉริยะ สำหรับนักพัฒนาทั้งหมด</p>
+                        <div class="project-tags">
+                            <span class="tag">AI</span>
+                            <span class="tag">Coding</span>
+                            <span class="tag">Dev Tools</span>
+                        </div>
+                        <a href="#" class="project-link">ดูเพิ่มเติม →</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section>
+        <div class="container">
+            <div class="stats">
+                <div class="stat-item">
+                    <h2>500+</h2>
+                    <p>โครงการสำเร็จ</p>
+                </div>
+                <div class="stat-item">
+                    <h2>10K+</h2>
+                    <p>ผู้ใช้งาน</p>
+                </div>
+                <div class="stat-item">
+                    <h2>4.9 ⭐</h2>
+                    <p>คะแนนเฉลี่ย</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section class="skills" id="skills">
+        <div class="container">
+            <h2 class="section-title">🛠️ ความสามารถหลัก</h2>
+            <div class="skills-grid">
+                <div class="skill-card">
+                    <div class="skill-icon">🤖</div>
+                    <h3>Machine Learning</h3>
+                    <p>เชี่ยวชาญในการสร้างและปรับแต่งโมเดล AI</p>
+                </div>
+                <div class="skill-card">
+                    <div class="skill-icon">🎨</div>
+                    <h3>Design Thinking</h3>
+                    <p>ออกแบบประสบการณ์ผู้ใช้ที่สวยงาม</p>
+                </div>
+                <div class="skill-card">
+                    <div class="skill-icon">⚙️</div>
+                    <h3>Full Stack Dev</h3>
+                    <p>พัฒนาแอปพลิเคชันแบบครบวงจร</p>
+                </div>
+                <div class="skill-card">
+                    <div class="skill-icon">📊</div>
+                    <h3>Data Analysis</h3>
+                    <p>วิเคราะห์ข้อมูลขนาดใหญ่อย่างมีประสิทธิภาพ</p>
+                </div>
+                <div class="skill-card">
+                    <div class="skill-icon">🔐</div>
+                    <h3>Cybersecurity</h3>
+                    <p>รักษาความปลอดภัยของข้อมูลอย่างเข้มงวด</p>
+                </div>
+                <div class="skill-card">
+                    <div class="skill-icon">☁️</div>
+                    <h3>Cloud Services</h3>
+                    <p>ใช้งาน AWS, GCP, Azure อย่างเชี่ยวชาญ</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta" id="contact">
+        <div class="container">
+            <h2>พร้อมเริ่มโครงการต่อไป?</h2>
+            <p>ติดต่อเราวันนี้และมาร่วมสร้างสิ่งมหัศจรรย์ด้วยกัน</p>
+            <button class="btn btn-primary">📧 ติดต่อเรา</button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="social-links">
+                <a href="#" title="Facebook">f</a>
+                <a href="#" title="Twitter">𝕏</a>
+                <a href="#" title="LinkedIn">in</a>
+                <a href="#" title="GitHub">⚡</a>
+            </div>
+            <p>&copy; 2026 Rnai Creator. สร้างผลงานที่ยอดเยี่ยม ✨</p>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Add animation on scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        });
+
+        document.querySelectorAll('.project-card, .skill-card').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'all 0.6s ease';
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>

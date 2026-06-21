@@ -15,6 +15,16 @@ import * as SecureStore from 'expo-secure-store';
 
 export const API_CONFIG = {
   baseUrl: process.env.EXPO_PUBLIC_API_URL ?? 'https://rnai-io.vercel.app',
+  /**
+   * Backup gateway URL(s) used for automatic failover when the primary backend
+   * is unreachable or erroring (network / timeout / 5xx). Comma-separated, tried
+   * in order after the primary. Point this at the self-hosted Rnai AI gateway.
+   * e.g. EXPO_PUBLIC_API_FALLBACK_URL="https://gateway.rnai.io,https://backup.rnai.io"
+   */
+  fallbackBaseUrls: (process.env.EXPO_PUBLIC_API_FALLBACK_URL ?? '')
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean),
   /** Build-time dev fallback only — per-user keys live in SecureStore. */
   apiKey: process.env.EXPO_PUBLIC_API_KEY ?? '',
   /** Generation can be slow — give the model time, but never hang forever. */
@@ -57,6 +67,8 @@ export class ApiError extends Error {
 export interface SkillInput {
   prompt: string;
   image?: string | null; // data URI
+  /** Base64 audio (no data: prefix needed) for speech-to-text. */
+  audio?: string | null;
   /** Extra skill-specific fields, e.g. { targetLanguage: 'Thai' } for translate. */
   extra?: Record<string, string>;
 }
@@ -73,10 +85,11 @@ interface SkillEndpoint {
   /** false = backend endpoint not deployed yet → UI shows "Coming Soon". */
   ready: boolean;
   needsImage?: boolean;
+  needsAudio?: boolean;
   buildPayload: (input: SkillInput) => Record<string, any>;
 }
 
-// ── Skill endpoint registry (all 11 skills) ─────────────────────────────────
+// ── Skill endpoint registry (all 16 skills) ─────────────────────────────────
 
 export const SKILL_ENDPOINTS: Record<string, SkillEndpoint> = {
   'image-gen': {
@@ -100,13 +113,45 @@ export const SKILL_ENDPOINTS: Record<string, SkillEndpoint> = {
     buildPayload: ({ prompt }) => ({ prompt }),
   },
   'website-gen': {
-    path: '/api/skills/website-gen', ready: true,
-    buildPayload: ({ prompt, extra }) => ({
-      template: extra?.template || 'wg-1',
-      title: extra?.title || prompt.substring(0, 50) || 'My Website',
-      description: prompt,
-      customizations: extra || {},
-    }),
+    path: '/api/v1/website/generate', ready: true,
+    buildPayload: ({ prompt, extra }) => {
+      const {
+        template,
+        siteName,
+        siteType,
+        colorTheme,
+        sections,
+        styleTone,
+        siteLanguage,
+      } = extra ?? {};
+
+      // Build an enriched custom prompt from the structured options so the AI
+      // has maximum context even if the backend doesn't consume every field.
+      const optionLines: string[] = [];
+      if (siteType) optionLines.push(`Website type: ${siteType}`);
+      if (colorTheme) optionLines.push(`Color theme: ${colorTheme}`);
+      if (sections) optionLines.push(`Include sections: ${sections}`);
+      if (styleTone) optionLines.push(`Design style: ${styleTone}`);
+      if (siteLanguage) optionLines.push(`Language: ${siteLanguage}`);
+
+      const websiteCustomPrompt = optionLines.length > 0
+        ? `${prompt}\n\n${optionLines.join('\n')}`
+        : prompt;
+
+      return {
+        websiteName: siteName || 'My Website',
+        websiteType: siteType || 'portfolio',
+        template: template || 'wg-1',
+        description: prompt,
+        websiteCustomPrompt,
+        customizations: {
+          ...(colorTheme ? { colorTheme } : {}),
+          ...(sections ? { sections } : {}),
+          ...(styleTone ? { styleTone } : {}),
+          ...(siteLanguage ? { language: siteLanguage } : {}),
+        },
+      };
+    },
   },
 
   'stylize': {
@@ -134,6 +179,81 @@ export const SKILL_ENDPOINTS: Record<string, SkillEndpoint> = {
   'audio-tts': {
     path: '/api/v1/audio/tts', ready: true,
     buildPayload: ({ prompt }) => ({ text: prompt }),
+  },
+
+  // ── 5 New Skills ───────────────────────────────────────────────────────────
+
+  /**
+   * Analyse / describe an image with vision AI.
+   * Routed through text/generate — the backend passes the image field to a
+   * vision-capable model (e.g. GPT-4o via OpenRouter) when present.
+   */
+  'image-describe': {
+    path: '/api/v1/text/generate', ready: true, needsImage: true,
+    buildPayload: ({ image, prompt }) => ({
+      prompt: prompt
+        ? `Analyze this image and answer the following question: ${prompt}`
+        : 'Analyze and describe this image in detail. Cover: main subjects, colors, style, mood, composition, any visible text, and notable details.',
+      image, // vision-capable models pick this up when the backend forwards it
+    }),
+  },
+
+  /**
+   * Restore and enhance faces in old or blurry photos.
+   * Routed through /api/v1/stylize with a restoration-focused prompt.
+   * Returns an enhanced image URL.
+   */
+  'face-restore': {
+    path: '/api/v1/stylize', ready: true, needsImage: true,
+    buildPayload: ({ image }) => ({
+      image,
+      prompt: 'Photo restoration: sharpen and restore facial features, reduce blur and noise, enhance skin texture and fine detail, improve clarity and dynamic range while keeping a natural realistic appearance.',
+    }),
+  },
+
+  /** Grammar and spelling correction — routed through text/generate */
+  'text-grammar': {
+    path: '/api/v1/text/generate', ready: true,
+    buildPayload: ({ prompt }) => ({
+      prompt: `You are a grammar editor. Correct ALL grammar, spelling, and punctuation errors in the following text. Return ONLY the corrected text with no explanations, no preamble, and no markdown:\n\n${prompt}`,
+    }),
+  },
+
+  /** Code generation from natural language — routed through text/generate */
+  'text-code': {
+    path: '/api/v1/text/generate', ready: true,
+    buildPayload: ({ prompt, extra }) => ({
+      prompt: `You are an expert ${extra?.language ?? 'JavaScript'} developer. Generate clean, well-commented ${extra?.language ?? 'JavaScript'} code for the following requirement. Return ONLY the code block with no extra explanation:\n\n${prompt}`,
+    }),
+  },
+
+  /** Social-media hashtag generator — routed through text/generate */
+  'text-hashtag': {
+    path: '/api/v1/text/generate', ready: true,
+    buildPayload: ({ prompt, extra }) => {
+      const platform = extra?.platform ?? 'Instagram';
+      const count = extra?.count ?? '20';
+      return {
+        prompt: `Generate exactly ${count} trending hashtags for ${platform} based on the following content. Mix popular, mid-range, and niche hashtags. Include both English and relevant local-language hashtags if applicable. Return ONLY the hashtags as a single space-separated line, each starting with #, no numbering, no explanations:\n\n${prompt}`,
+      };
+    },
+  },
+
+  /** Speech-to-text — transcribe a recorded/uploaded audio clip */
+  'audio-stt': {
+    path: '/api/v1/audio/stt', ready: true, needsAudio: true,
+    buildPayload: ({ audio }) => ({ audio }),
+  },
+
+  /** Structured data extraction from text → JSON */
+  'text-extract': {
+    path: '/api/v1/text/extract', ready: true,
+    buildPayload: ({ prompt, extra }) => ({
+      text: prompt,
+      schema: extra?.schema?.trim()
+        ? extra.schema
+        : 'Extract the key entities, facts and fields from the text and return them as a clean JSON object.',
+    }),
   },
 };
 
@@ -253,15 +373,43 @@ const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
 // ── Public API ──────────────────────────────────────────────────────────────
 
-/** Quick reachability check for the backend (for offline banners). */
+/**
+ * Quick reachability check for the backend (for offline banners).
+ * Strategy: try HEAD on the base URL first (cheap, no auth needed),
+ * fall back to a lightweight GET on a known API route so we don't
+ * depend on a dedicated /status endpoint that may not exist.
+ */
 export async function pingApi(): Promise<boolean> {
+  // 1️⃣ Try HEAD on the root — works on Vercel even without a route
   try {
     const res = await fetchWithTimeout(
-      `${API_CONFIG.baseUrl}/status`,
-      { method: 'GET' },
+      `${API_CONFIG.baseUrl}/`,
+      { method: 'HEAD' },
       API_CONFIG.pingTimeoutMs,
     );
-    return res.ok;
+    // Any HTTP response (including 404/405) means the server is reachable
+    if (res.status < 500) return true;
+  } catch {
+    // Network-level failure — fall through to secondary check
+  }
+
+  // 2️⃣ Fall back: POST to a real API route with an empty body.
+  // Auth happens before body validation, so:
+  //   401/403 → server is up (auth issue, not offline)
+  //   400     → server is up (bad body, expected)
+  //   5xx     → server is up but broken
+  //   network error → truly offline
+  try {
+    const res = await fetchWithTimeout(
+      `${API_CONFIG.baseUrl}/api/v1/text/generate`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      },
+      API_CONFIG.pingTimeoutMs,
+    );
+    return res.status < 500;
   } catch {
     return false;
   }
@@ -283,10 +431,41 @@ export async function executeSkill(skillId: string, input: SkillInput): Promise<
   if (endpoint.needsImage && !input.image) {
     throw new ApiError('bad-request', 'This skill requires an image');
   }
+  if (endpoint.needsAudio && !input.audio) {
+    throw new ApiError('bad-request', 'This skill requires audio');
+  }
 
-  const url = `${API_CONFIG.baseUrl}${endpoint.path}`;
   const body = JSON.stringify(endpoint.buildPayload(input));
 
+  // Failover chain: primary backend first, then any backup gateways. We only
+  // move to the next base when the current one is DOWN (network/timeout/5xx) —
+  // problems with the request itself (auth, credits, bad input) are thrown as-is.
+  const bases = [API_CONFIG.baseUrl, ...API_CONFIG.fallbackBaseUrls];
+  let lastError: ApiError = new ApiError('network', 'Request failed');
+
+  for (let b = 0; b < bases.length; b++) {
+    try {
+      return await requestSkillOnce(`${bases[b]}${endpoint.path}`, body, apiKey, skillId);
+    } catch (err: any) {
+      const apiErr = err instanceof ApiError
+        ? err
+        : new ApiError('network', err?.message ?? 'Unknown error');
+      lastError = apiErr;
+      // Connectivity/outage → try the next (backup) base; otherwise stop.
+      if (isRetryable(apiErr) && b < bases.length - 1) continue;
+      throw apiErr;
+    }
+  }
+  throw lastError;
+}
+
+/** One base URL with the configured retry/backoff. Throws ApiError. */
+async function requestSkillOnce(
+  url: string,
+  body: string,
+  apiKey: string,
+  skillId: string,
+): Promise<SkillResult> {
   let lastError: ApiError = new ApiError('network', 'Request failed');
   for (let attempt = 0; attempt <= API_CONFIG.maxRetries; attempt++) {
     if (attempt > 0) await sleep(API_CONFIG.retryBackoffMs * attempt);
@@ -322,6 +501,27 @@ function parseResult(skillId: string, data: any): SkillResult {
   if (typeof data?.url === 'string') {
     const kind = skillId === 'audio-tts' ? 'audio' : 'image';
     return { kind, content: data.url, raw: data };
+  }
+  // image-describe returns { description: string }
+  if (skillId === 'image-describe' && typeof data?.description === 'string') {
+    return { kind: 'text', content: data.description, raw: data };
+  }
+  // text-grammar returns { corrected: string } or { result: string }
+  if (skillId === 'text-grammar' && typeof data?.corrected === 'string') {
+    return { kind: 'text', content: data.corrected, raw: data };
+  }
+  // text-code returns { code: string }
+  if (skillId === 'text-code' && typeof data?.code === 'string') {
+    return { kind: 'text', content: data.code, raw: data };
+  }
+  // text-hashtag returns { hashtags: string[] | string }
+  if (skillId === 'text-hashtag') {
+    if (Array.isArray(data?.hashtags)) {
+      return { kind: 'text', content: data.hashtags.join(' '), raw: data };
+    }
+    if (typeof data?.hashtags === 'string') {
+      return { kind: 'text', content: data.hashtags, raw: data };
+    }
   }
   if (typeof data?.image === 'string') {
     return { kind: 'image', content: data.image, raw: data };
@@ -382,6 +582,79 @@ const ERROR_MESSAGES: Record<ApiErrorCode, { th: string; en: string }> = {
     en: 'Unexpected server response — please try again',
   },
 };
+
+// ── TrueMoney e-Voucher Redemption ─────────────────────────────────────────
+
+export interface TrueMoneyRedeemResult {
+  /** Amount in THB that was redeemed (e.g. 50) */
+  amountBaht: number;
+  /** Rnai credits added to the account */
+  creditsAdded: number;
+  /** Backend transaction ID for receipt */
+  transactionId: string;
+}
+
+/**
+ * Redeem a TrueMoney Gift Voucher (e-Voucher) for Rnai.io credits.
+ *
+ * Accepts either the full gift URL or just the hash code:
+ *   - https://gift.truemoney.com/campaign/?v=<HASH>
+ *   - <HASH> (16-char alphanumeric)
+ *
+ * Backend endpoint: POST /api/v1/payments/truemoney/redeem
+ * Required fields: { voucher_hash, api_key }
+ * Returns: { amount_baht, credits_added, transaction_id }
+ */
+export async function redeemTrueMoneyVoucher(
+  voucherInput: string,
+): Promise<TrueMoneyRedeemResult> {
+  const apiKey = await getActiveApiKey();
+  if (!apiKey) throw new ApiError('no-api-key', 'No API key — add yours in Profile > API Key');
+
+  // Extract hash from full URL if user pasted the link
+  const hashMatch =
+    voucherInput.match(/[?&]v=([A-Za-z0-9]+)/) ??
+    voucherInput.match(/^([A-Za-z0-9]{16,})$/);
+  const voucherHash = hashMatch?.[1] ?? voucherInput.trim();
+
+  if (!voucherHash) throw new ApiError('bad-request', 'Invalid voucher input');
+
+  const url = `${API_CONFIG.baseUrl}/api/v1/payments/truemoney/redeem`;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), API_CONFIG.timeoutMs);
+
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({ voucher_hash: voucherHash }),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timer);
+    const data = await res.json().catch(() => ({}));
+
+    if (res.status === 401) throw new ApiError('auth', data?.message);
+    if (res.status === 402) throw new ApiError('no-credits', data?.message);
+    if (res.status === 429) throw new ApiError('rate-limit', data?.message);
+    if (res.status === 400) throw new ApiError('bad-request', data?.message ?? 'Voucher invalid or already used');
+    if (!res.ok) throw new ApiError('server', data?.message);
+
+    return {
+      amountBaht: data.amount_baht ?? 0,
+      creditsAdded: data.credits_added ?? 0,
+      transactionId: data.transaction_id ?? '',
+    };
+  } catch (err) {
+    clearTimeout(timer);
+    if ((err as Error)?.name === 'AbortError') throw new ApiError('timeout', 'Request timed out');
+    if (err instanceof ApiError) throw err;
+    throw new ApiError('network', 'Network error');
+  }
+}
 
 export function getErrorMessage(error: unknown, lang: string): string {
   const key: 'th' | 'en' = lang === 'th' ? 'th' : 'en';

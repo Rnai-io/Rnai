@@ -574,6 +574,241 @@ export const SKILL_TEMPLATES: Record<string, PromptTemplate[]> = {
     },
   ],
 
+  // ─── 12. DESCRIBE / ANALYZE IMAGE ────────────────────────────────────────
+  'image-describe': [
+    {
+      id: 'id-1', label: '🔍 Full Analysis',
+      prompt: 'Describe everything you see in this image in detail: objects, people, colors, composition, mood, and any text visible.',
+      exampleCaption: '📋 Detailed scene analysis covering all visual elements',
+      th: { label: '🔍 วิเคราะห์ครบ', caption: 'อธิบายทุกองค์ประกอบในภาพอย่างละเอียด' },
+    },
+    {
+      id: 'id-2', label: '🏷️ Identify Objects',
+      prompt: 'List all objects, items, and elements you can identify in this image with their approximate positions.',
+      exampleCaption: '📋 Object inventory with positions',
+      th: { label: '🏷️ ระบุวัตถุ', caption: 'ระบุวัตถุและตำแหน่งในภาพทั้งหมด' },
+    },
+    {
+      id: 'id-3', label: '🎨 Color & Style',
+      prompt: 'Analyze the color palette, artistic style, composition techniques, and overall aesthetic of this image.',
+      exampleCaption: '📋 Color palette and artistic style breakdown',
+      th: { label: '🎨 สีและสไตล์', caption: 'วิเคราะห์จานสีและสไตล์ศิลปะ' },
+    },
+    {
+      id: 'id-4', label: '📝 Read Text',
+      prompt: 'Extract and transcribe all text visible in this image exactly as it appears, including signs, labels, and captions.',
+      exampleCaption: '📋 All text extracted from the image',
+      th: { label: '📝 อ่านข้อความ', caption: 'ถอดข้อความทั้งหมดที่มองเห็นในภาพ' },
+    },
+    {
+      id: 'id-5', label: '📊 Product Review',
+      prompt: 'Analyze this product image for e-commerce: describe the product, its condition, key features visible, and suggest improvements for the listing photo.',
+      exampleCaption: '📋 E-commerce product image analysis',
+      th: { label: '📊 วิเคราะห์สินค้า', caption: 'วิเคราะห์ภาพสินค้าเพื่อ e-commerce' },
+    },
+  ],
+
+  // ─── 13. FACE RESTORE ─────────────────────────────────────────────────────
+  'face-restore': [
+    {
+      id: 'fr-1', label: '👴 Old Photo',
+      prompt: 'Restore and enhance faces in this old, damaged, or faded photograph to crisp, clear HD quality.',
+      exampleImage: 'https://images.unsplash.com/photo-1481349518771-20055b2a7b24?w=600&q=80',
+      exampleCaption: '✨ Old photograph face restoration to HD clarity',
+      th: { label: '👴 รูปเก่า', caption: 'ฟื้นฟูใบหน้าในรูปเก่าให้คมชัด HD' },
+    },
+    {
+      id: 'fr-2', label: '🌫️ Blurry Portrait',
+      prompt: 'Sharpen and restore blurry or out-of-focus faces in this portrait photo.',
+      exampleImage: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=600&q=80',
+      exampleCaption: '✨ Blurry portrait sharpened and restored',
+      th: { label: '🌫️ รูปเบลอ', caption: 'แก้รูปบุคคลเบลอให้คมชัด' },
+    },
+    {
+      id: 'fr-3', label: '📸 Low Resolution',
+      prompt: 'Enhance and upscale the faces in this low-resolution photo to high definition quality.',
+      exampleImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80',
+      exampleCaption: '✨ Low-res face enhanced to high definition',
+      th: { label: '📸 รูปความละเอียดต่ำ', caption: 'ขยายใบหน้าในรูปความละเอียดต่ำให้ HD' },
+    },
+    {
+      id: 'fr-4', label: '🌙 Dark/Night Photo',
+      prompt: 'Restore faces that are poorly lit, dark, or taken in low-light conditions.',
+      exampleImage: 'https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=600&q=80',
+      exampleCaption: '✨ Dark photo face brightened and restored',
+      th: { label: '🌙 รูปมืด', caption: 'ฟื้นฟูใบหน้าในรูปแสงน้อย' },
+    },
+    {
+      id: 'fr-5', label: '👨‍👩‍👧 Group Photo',
+      prompt: 'Restore and enhance all faces in this group photo, improving clarity and detail for every person.',
+      exampleImage: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=600&q=80',
+      exampleCaption: '✨ Group photo with all faces restored',
+      th: { label: '👨‍👩‍👧 รูปหมู่', caption: 'ฟื้นฟูทุกใบหน้าในรูปถ่ายหมู่' },
+    },
+  ],
+
+  // ─── 14. GRAMMAR CHECK ────────────────────────────────────────────────────
+  'text-grammar': [
+    {
+      id: 'tgr-1', label: '✏️ Quick Fix',
+      prompt: 'Check and correct all grammar, spelling, and punctuation errors in the following text. Show the corrected version.\n\n[Paste your text here]',
+      exampleCaption: '✅ Corrected text with all errors fixed',
+      th: {
+        label: '✏️ แก้ด่วน',
+        prompt: 'ตรวจสอบและแก้ไขข้อผิดพลาดด้านไวยากรณ์ การสะกดคำ และเครื่องหมายวรรคตอนทั้งหมดในข้อความต่อไปนี้\n\n[วางข้อความของคุณที่นี่]',
+        caption: '✅ ข้อความที่ได้รับการแก้ไขครบทุกข้อผิดพลาด',
+      },
+    },
+    {
+      id: 'tgr-2', label: '📋 With Explanations',
+      prompt: 'Correct this text and explain each grammar error found. List the corrections with the rule that was violated.\n\n[Paste your text here]',
+      exampleCaption: '✅ Corrected text plus explanation of each mistake',
+      th: {
+        label: '📋 พร้อมคำอธิบาย',
+        prompt: 'แก้ไขข้อความนี้และอธิบายข้อผิดพลาดทางไวยากรณ์ที่พบ พร้อมระบุกฎที่ถูกละเมิด\n\n[วางข้อความของคุณที่นี่]',
+        caption: '✅ ข้อความที่แก้ไขพร้อมคำอธิบายแต่ละข้อผิดพลาด',
+      },
+    },
+    {
+      id: 'tgr-3', label: '🇹🇭 Thai Language',
+      prompt: 'ตรวจสอบข้อความภาษาไทยต่อไปนี้ แก้ไขการสะกด วรรคตอน และไวยากรณ์ให้ถูกต้อง\n\n[วางข้อความภาษาไทยที่นี่]',
+      exampleCaption: '✅ Thai text corrected and polished',
+      th: {
+        label: '🇹🇭 ภาษาไทย',
+        prompt: 'ตรวจสอบข้อความภาษาไทยต่อไปนี้ แก้ไขการสะกด วรรคตอน และไวยากรณ์ให้ถูกต้อง\n\n[วางข้อความภาษาไทยที่นี่]',
+        caption: '✅ ข้อความภาษาไทยถูกต้องและขัดเกลา',
+      },
+    },
+    {
+      id: 'tgr-4', label: '📧 Email Polish',
+      prompt: 'Fix all grammar and spelling in this email, and also improve the overall professional tone while keeping the original meaning.\n\n[Paste email here]',
+      exampleCaption: '✅ Professional email with perfect grammar',
+      th: {
+        label: '📧 ขัดเกลาอีเมล',
+        prompt: 'แก้ไขไวยากรณ์และการสะกดในอีเมลนี้ และปรับโทนให้เป็นมืออาชีพมากขึ้น โดยยังคงความหมายเดิมไว้\n\n[วางอีเมลที่นี่]',
+        caption: '✅ อีเมลมืออาชีพไวยากรณ์สมบูรณ์',
+      },
+    },
+    {
+      id: 'tgr-5', label: '📝 Essay Review',
+      prompt: 'Review this essay for grammar, coherence, and clarity. Fix errors and suggest improvements for sentence structure and flow.\n\n[Paste essay here]',
+      exampleCaption: '✅ Essay reviewed with grammar and flow improvements',
+      th: {
+        label: '📝 ตรวจเรียงความ',
+        prompt: 'ตรวจสอบเรียงความนี้ด้านไวยากรณ์ ความต่อเนื่อง และความชัดเจน แก้ไขข้อผิดพลาดและเสนอการปรับปรุงโครงสร้างประโยค\n\n[วางเรียงความที่นี่]',
+        caption: '✅ เรียงความที่ผ่านการตรวจและปรับปรุงแล้ว',
+      },
+    },
+  ],
+
+  // ─── 15. CODE GENERATOR ───────────────────────────────────────────────────
+  'text-code': [
+    {
+      id: 'tc-1', label: '⚛️ React Component',
+      prompt: 'Write a React functional component for a responsive card with an image, title, description, and "Learn More" button. Use Tailwind CSS for styling. Include TypeScript types.',
+      exampleCaption: '💻 Clean TypeScript React card component with Tailwind',
+      th: {
+        label: '⚛️ React Component',
+        prompt: 'เขียน React functional component สำหรับการ์ดแบบ responsive มีรูปภาพ ชื่อ คำอธิบาย และปุ่ม "เรียนรู้เพิ่มเติม" ใช้ Tailwind CSS สำหรับ styling รวม TypeScript types',
+        caption: '💻 React card component TypeScript พร้อม Tailwind',
+      },
+    },
+    {
+      id: 'tc-2', label: '🐍 Python Script',
+      prompt: 'Write a Python script that reads a CSV file, calculates the average of a specified column, and generates a bar chart using matplotlib. Include error handling and docstrings.',
+      exampleCaption: '💻 Python CSV analyzer with matplotlib chart',
+      th: {
+        label: '🐍 Python Script',
+        prompt: 'เขียน Python script ที่อ่านไฟล์ CSV คำนวณค่าเฉลี่ยของคอลัมน์ที่กำหนด และสร้าง bar chart ด้วย matplotlib รวม error handling และ docstrings',
+        caption: '💻 Python วิเคราะห์ CSV พร้อมกราฟ matplotlib',
+      },
+    },
+    {
+      id: 'tc-3', label: '🌐 REST API',
+      prompt: 'Write a Node.js/Express REST API with GET, POST, PUT, DELETE endpoints for a "products" resource. Include middleware for error handling and input validation. Use async/await.',
+      exampleCaption: '💻 Complete Express REST API with CRUD operations',
+      th: {
+        label: '🌐 REST API',
+        prompt: 'เขียน Node.js/Express REST API พร้อม endpoint GET POST PUT DELETE สำหรับ "products" มี middleware สำหรับ error handling และ input validation ใช้ async/await',
+        caption: '💻 Express REST API ครบ CRUD operations',
+      },
+    },
+    {
+      id: 'tc-4', label: '🗃️ SQL Query',
+      prompt: 'Write SQL queries for an e-commerce database: 1) Get top 10 customers by total spend, 2) Find products with low stock (< 10 units), 3) Monthly revenue report for the past 12 months.',
+      exampleCaption: '💻 E-commerce analytics SQL queries',
+      th: {
+        label: '🗃️ SQL Query',
+        prompt: 'เขียน SQL queries สำหรับฐานข้อมูล e-commerce: 1) ลูกค้า 10 อันดับแรกตามยอดซื้อรวม 2) สินค้าที่ stock ต่ำ (< 10 ชิ้น) 3) รายงานรายได้รายเดือน 12 เดือนย้อนหลัง',
+        caption: '💻 SQL queries วิเคราะห์ข้อมูล e-commerce',
+      },
+    },
+    {
+      id: 'tc-5', label: '📱 Expo Screen',
+      prompt: 'Write a complete React Native / Expo screen for a user profile page with: avatar, name, email, edit button, and a settings list. Use StyleSheet for styling. TypeScript.',
+      exampleCaption: '💻 Complete Expo profile screen component',
+      th: {
+        label: '📱 Expo Screen',
+        prompt: 'เขียน React Native / Expo screen สมบูรณ์สำหรับหน้าโปรไฟล์ผู้ใช้ มี: avatar ชื่อ อีเมล ปุ่มแก้ไข และรายการตั้งค่า ใช้ StyleSheet TypeScript',
+        caption: '💻 Expo profile screen component สมบูรณ์',
+      },
+    },
+  ],
+
+  // ─── 16. HASHTAG GENERATOR ────────────────────────────────────────────────
+  'text-hashtag': [
+    {
+      id: 'th-1', label: '📸 Instagram Food',
+      prompt: 'Generate 25 highly relevant and trending Instagram hashtags for a food photo at a Thai restaurant. Mix popular, medium, and niche hashtags. Include both English and Thai hashtags.',
+      exampleCaption: '#️⃣ 25 food hashtags for maximum Instagram reach',
+      th: {
+        label: '📸 อาหาร Instagram',
+        prompt: 'สร้าง hashtag Instagram ที่เกี่ยวข้องและกำลังเทรนด์ 25 อัน สำหรับรูปอาหารที่ร้านอาหารไทย ผสมระหว่าง hashtag ยอดนิยม ปานกลาง และเฉพาะกลุ่ม รวมทั้งภาษาไทยและอังกฤษ',
+        caption: '#️⃣ 25 hashtag อาหารเพิ่มการเข้าถึง Instagram สูงสุด',
+      },
+    },
+    {
+      id: 'th-2', label: '💼 LinkedIn Business',
+      prompt: 'Generate 15 professional LinkedIn hashtags for a post about startup entrepreneurship and AI technology trends in Southeast Asia.',
+      exampleCaption: '#️⃣ 15 professional LinkedIn hashtags for business content',
+      th: {
+        label: '💼 LinkedIn ธุรกิจ',
+        prompt: 'สร้าง hashtag LinkedIn แบบมืออาชีพ 15 อัน สำหรับโพสต์เกี่ยวกับ startup ผู้ประกอบการและเทรนด์เทคโนโลยี AI ในเอเชียตะวันออกเฉียงใต้',
+        caption: '#️⃣ 15 hashtag LinkedIn มืออาชีพสำหรับเนื้อหาธุรกิจ',
+      },
+    },
+    {
+      id: 'th-3', label: '🎵 TikTok Viral',
+      prompt: 'Generate 20 viral and trending TikTok hashtags for a travel video filmed in Thailand. Focus on hashtags with the potential to go viral with a younger audience.',
+      exampleCaption: '#️⃣ 20 TikTok travel hashtags optimized for virality',
+      th: {
+        label: '🎵 TikTok ไวรัล',
+        prompt: 'สร้าง hashtag TikTok ที่กำลังเทรนด์และมีโอกาสไวรัล 20 อัน สำหรับวิดีโอท่องเที่ยวที่ถ่ายในประเทศไทย เน้น hashtag ที่มีโอกาสเข้าถึงผู้ชมรุ่นใหม่',
+        caption: '#️⃣ 20 hashtag TikTok ท่องเที่ยวที่มีโอกาสไวรัล',
+      },
+    },
+    {
+      id: 'th-4', label: '🛍️ E-Commerce Product',
+      prompt: 'Generate hashtags for an e-commerce product post about handmade organic skincare. Include hashtags for: beauty, organic, skincare, sustainable, and Thai-made products.',
+      exampleCaption: '#️⃣ Product hashtags covering beauty and organic niches',
+      th: {
+        label: '🛍️ สินค้า E-Commerce',
+        prompt: 'สร้าง hashtag สำหรับโพสต์สินค้า e-commerce เกี่ยวกับสกินแคร์ออร์แกนิกแฮนด์เมด รวม hashtag สำหรับ: ความงาม ออร์แกนิก สกินแคร์ ยั่งยืน และสินค้าไทย',
+        caption: '#️⃣ Hashtag สินค้าครอบคลุมกลุ่มความงามและออร์แกนิก',
+      },
+    },
+    {
+      id: 'th-5', label: '🎨 Creative Art',
+      prompt: 'Generate hashtags for sharing AI-generated digital artwork on social media platforms. Include artist communities, AI art, and digital art hashtags.',
+      exampleCaption: '#️⃣ Art hashtags for the AI and creative communities',
+      th: {
+        label: '🎨 งานศิลปะ Creative',
+        prompt: 'สร้าง hashtag สำหรับแชร์งานศิลปะดิจิทัลที่สร้างด้วย AI บน social media รวม hashtag ชุมชนศิลปิน AI art และ digital art',
+        caption: '#️⃣ Hashtag ศิลปะสำหรับชุมชน AI และครีเอทีฟ',
+      },
+    },
+  ],
+
   // ─── 11. TEXT TO SPEECH ───────────────────────────────────────────────────
   'audio-tts': [
     {
@@ -641,9 +876,9 @@ export const SKILL_TEMPLATES: Record<string, PromptTemplate[]> = {
 
 // Helper to get skill type category
 export const getSkillCategory = (skillId: string): 'image' | 'text' | 'audio' | 'web' => {
-  const imageSkills = ['image-gen', 'image-edit', 'remove-bg', 'upscale', 'stylize'];
-  const textSkills = ['text-gen', 'text-sum', 'text-trans', 'text-rewrite'];
-  const audioSkills = ['audio-tts'];
+  const imageSkills = ['image-gen', 'image-edit', 'remove-bg', 'upscale', 'stylize', 'image-describe', 'face-restore'];
+  const textSkills  = ['text-gen', 'text-sum', 'text-trans', 'text-rewrite', 'text-grammar', 'text-code', 'text-hashtag', 'text-extract'];
+  const audioSkills = ['audio-tts', 'audio-stt'];
   if (imageSkills.includes(skillId)) return 'image';
   if (textSkills.includes(skillId)) return 'text';
   if (audioSkills.includes(skillId)) return 'audio';

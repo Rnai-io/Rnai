@@ -1,0 +1,17 @@
+# Rnai LLM training kit
+# ---------------------
+# Local training (train_rnai_llm.py) on a 24GB GPU:
+unsloth
+trl
+peft
+transformers
+datasets
+bitsandbytes
+torch
+
+# Cloud training (modal_train.py): only `modal` is needed locally; the rest is
+# installed inside the Modal image automatically.
+modal
+
+# expand_dataset.py and eval_rnai_llm.py use the Python standard library only.
+# They need the env var GEMINI_API_KEY (already in the backend .env.local).

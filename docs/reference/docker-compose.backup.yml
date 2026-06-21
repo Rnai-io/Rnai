@@ -1,0 +1,69 @@
+# Rnai AI — Self-Hosted Backup Inference Stack (reference)
+# ---------------------------------------------------------
+# Deploy on a GPU host (RunPod / Lambda / Fly.io GPU / your server). Each service
+# exposes a simple HTTP API that the Rnai AI Gateway falls back to. The lightweight
+# services (piper, rembg) can also run on a cheap CPU box for an always-on tier.
+#
+# After `docker compose up -d`, point the gateway env at these services:
+#   SELF_VLLM_URL=http://<host>:8000
+#   SELF_SDXL_URL=http://<host>:8188   (ComfyUI) or your diffusers wrapper
+#   SELF_TTS_URL=http://<host>:5000
+#
+# NOTE: GPU services need the NVIDIA Container Toolkit on the host.
+
+services:
+  # ── LLM: text-gen / summarize / translate / rewrite / grammar / code / hashtag / website / vision ──
+  vllm:
+    image: vllm/vllm-openai:latest
+    command: >
+      --model ${VLLM_MODEL:-meta-llama/Llama-3.1-8B-Instruct}
+      --served-model-name rnai-llm
+      --max-model-len 8192
+    ports:
+      - "8000:8000"          # OpenAI-compatible API at /v1/chat/completions
+    environment:
+      - HUGGING_FACE_HUB_TOKEN=${HF_TOKEN}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - { driver: nvidia, count: 1, capabilities: ["gpu"] }
+    restart: unless-stopped
+
+  # ── Images: generate / edit / stylize / face-restore (SDXL/FLUX via ComfyUI) ──
+  comfyui:
+    image: yanwk/comfyui-boot:latest
+    ports:
+      - "8188:8188"
+    volumes:
+      - ./models:/root/ComfyUI/models   # put SDXL/FLUX checkpoints here
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - { driver: nvidia, count: 1, capabilities: ["gpu"] }
+    restart: unless-stopped
+
+  # ── TTS: audio-tts (Piper = light, CPU-friendly always-on fallback) ──
+  piper-tts:
+    image: lscr.io/linuxserver/piper:latest
+    ports:
+      - "5000:5000"
+    environment:
+      - PIPER_VOICE=${PIPER_VOICE:-en_US-amy-medium}
+    restart: unless-stopped
+
+  # ── Utility: remove-bg (rembg, CPU OK) ──
+  rembg:
+    image: danielgatis/rembg:latest
+    command: s --host 0.0.0.0 --port 7000
+    ports:
+      - "7000:7000"
+    restart: unless-stopped
+
+  # ── Optional: Real-ESRGAN upscale worker (GPU) — add your own wrapper image ──
+  # upscale:
+  #   build: ./upscale
+  #   ports: ["7100:7100"]
+  #   deploy: { resources: { reservations: { devices: [{ driver: nvidia, count: 1, capabilities: ["gpu"] }] } } }
+  #   restart: unless-stopped

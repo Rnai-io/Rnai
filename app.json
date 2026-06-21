@@ -2,7 +2,7 @@
   "expo": {
     "name": "Rnai.io Mobile",
     "slug": "rnai-mobile",
-    "version": "1.9.0",
+    "version": "2.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
@@ -12,15 +12,24 @@
     },
     "ios": {
       "supportsTabletMode": true,
-      "bundleIdentifier": "io.rnai.mobile"
+      "bundleIdentifier": "io.rnai.mobile",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "Rnai uses the microphone to record audio for speech-to-text."
+      }
     },
     "android": {
       "package": "io.rnai.mobile",
+      "permissions": ["android.permission.RECORD_AUDIO"],
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#34308C"
       }
     },
-    "plugins": []
+    "plugins": [
+      [
+        "expo-audio",
+        { "microphonePermission": "Rnai uses the microphone to record audio for speech-to-text." }
+      ]
+    ]
   }
 }

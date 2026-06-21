@@ -1,5 +1,5 @@
 import React from 'react';
-import { Platform, Dimensions, View, ActivityIndicator } from 'react-native';
+import { Platform, Dimensions, View, ActivityIndicator, Image } from 'react-native';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -16,6 +16,7 @@ import AiManagerScreen from './app/screens/aimanager';
 import ProfileScreen from './app/screens/profile';
 import SkillDetailScreen from './app/skill/[id]';
 import AuthScreen from './app/screens/auth';
+import LegalScreen from './app/screens/legal';
 
 const Tab = createBottomTabNavigator();
 
@@ -134,6 +135,10 @@ function TabNavigator() {
         name="Skill" component={SkillDetailScreen}
         options={{ tabBarButton: () => null, tabBarStyle: { display: 'none' } }}
       />
+      <Tab.Screen
+        name="Legal" component={LegalScreen}
+        options={{ tabBarButton: () => null, tabBarStyle: { display: 'none' } }}
+      />
     </Tab.Navigator>
   );
 }
@@ -146,6 +151,11 @@ function RootNavigator() {
   if (!isHydrated) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
+        <Image
+          source={require('./assets/icon.png')}
+          style={{ width: 88, height: 88, borderRadius: 24, marginBottom: 20 }}
+          resizeMode="cover"
+        />
         <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );

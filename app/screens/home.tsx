@@ -30,6 +30,8 @@ const SKILL_GRID_CONFIG = [
   { id: 'audio-tts',    icon: '🔊', colors: ['#06B6D4', '#0E7490'] as [string,string] },
   { id: 'text-trans',   icon: '🌐', colors: ['#14B8A6', '#0F766E'] as [string,string] },
   { id: 'text-rewrite', icon: '♻️', colors: ['#F97316', '#EA580C'] as [string,string] },
+  { id: 'audio-stt',    icon: '🎙️', colors: ['#0E7490', '#155E75'] as [string,string] },
+  { id: 'text-extract', icon: '🧩', colors: ['#7C3AED', '#6D28D9'] as [string,string] },
 ];
 
 // ── Recent placeholder images ─────────────────────────────────────────────────

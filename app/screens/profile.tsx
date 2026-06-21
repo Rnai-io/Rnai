@@ -7,6 +7,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useLanguage } from '../context/LanguageContext';
 import { LANGUAGE_META, LangCode } from '../i18n';
@@ -28,16 +29,8 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 // ── Data ─────────────────────────────────────────────────────────────────────
 
-const LANGUAGES = [
-  { code: 'th', label: 'ภาษาไทย', flag: '🇹🇭', name: 'Thai' },
-  { code: 'en', label: 'English', flag: '🇺🇸', name: 'English' },
-  { code: 'ja', label: '日本語', flag: '🇯🇵', name: 'Japanese' },
-  { code: 'zh', label: '中文', flag: '🇨🇳', name: 'Chinese' },
-  { code: 'ko', label: '한국어', flag: '🇰🇷', name: 'Korean' },
-  { code: 'fr', label: 'Français', flag: '🇫🇷', name: 'French' },
-  { code: 'de', label: 'Deutsch', flag: '🇩🇪', name: 'German' },
-  { code: 'es', label: 'Español', flag: '🇪🇸', name: 'Spanish' },
-];
+// Single source of truth — th, en + ASEAN, then the rest (see app/i18n)
+const LANGUAGES = LANGUAGE_META;
 
 const IMAGE_QUALITY_OPTIONS = [
   { id: 'standard', label: 'Standard', desc: '512×512 · Fast' },
@@ -163,6 +156,7 @@ function SettingsCard({ children }: { children: React.ReactNode }) {
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation<any>();
   const { colors, scheme, toggleScheme } = useTheme();
   const { lang, setLang, t } = useLanguage();
   const isVibrant = scheme === 'vibrant';
@@ -801,21 +795,21 @@ export default function ProfileScreen() {
             <SettingsRow icon="chatbubble-outline" iconColor="#8B5CF6" iconBg="#EDE9FE"
               label={t.profile.fields.feedback}
               onPress={() => Linking.openURL(
-                `mailto:naiguitarfolk@gmail.com?subject=${encodeURIComponent('Rnai.io Mobile Feedback')}&body=${encodeURIComponent(`\n\n—\nApp v${Constants.expoConfig?.version ?? '1.9.0'} · ${authUser?.email ?? 'guest'}`)}`
+                `mailto:naiguitarfolk@gmail.com?subject=${encodeURIComponent('Rnai.io Mobile Feedback')}&body=${encodeURIComponent(`\n\n—\nApp v${Constants.expoConfig?.version ?? '2.0.0'} · ${authUser?.email ?? 'guest'}`)}`
               ).catch(() => Alert.alert(t.common.error, lang === 'th' ? 'เปิดแอปอีเมลไม่ได้' : 'Could not open mail app.'))} />
             <SettingsRow icon="document-text-outline" iconColor="#6B7280" iconBg="#F3F4F6"
               label={t.profile.fields.privacy}
-              onPress={() => Linking.openURL('https://rnai-io.vercel.app/privacy').catch(() => {})} />
+              onPress={() => navigation.navigate('Legal', { doc: 'privacy' })} />
             <SettingsRow icon="newspaper-outline" iconColor="#6B7280" iconBg="#F3F4F6"
               label={t.profile.fields.terms}
-              onPress={() => Linking.openURL('https://rnai-io.vercel.app/terms').catch(() => {})} />
+              onPress={() => navigation.navigate('Legal', { doc: 'terms' })} />
           </SettingsCard>
 
           {/* ── About ── */}
           <SectionHeader title={t.profile.sections.about} />
           <SettingsCard>
             <SettingsRow icon="information-circle-outline" iconColor="#6B7280" iconBg="#F3F4F6"
-              label={t.profile.fields.appVersion} value={`v${Constants.expoConfig?.version ?? '1.9.0'}`} showArrow={false} />
+              label={t.profile.fields.appVersion} value={`v${Constants.expoConfig?.version ?? '2.0.0'}`} showArrow={false} />
             <SettingsRow icon="server-outline" iconColor="#6B7280" iconBg="#F3F4F6"
               label={t.profile.fields.apiStatus} value={t.profile.operationalLabel} showArrow={false} />
           </SettingsCard>

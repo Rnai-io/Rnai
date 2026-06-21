@@ -12,17 +12,25 @@ import { getSkillCategory } from '../data/skillTemplates';
 
 // Brand color per skill — same palette as the Home grid
 const SKILL_COLORS: Record<string, string> = {
-  'image-gen':    '#9333EA',
-  'image-edit':   '#0EA5E9',
-  'remove-bg':    '#10B981',
-  'upscale':      '#F59E0B',
-  'stylize':      '#EC4899',
-  'text-gen':     '#8B5CF6',
-  'text-sum':     '#14B8A6',
-  'text-trans':   '#3B82F6',
-  'text-rewrite': '#F97316',
-  'website-gen':  '#6366F1',
-  'audio-tts':    '#06B6D4',
+  'image-gen':      '#9333EA',
+  'image-edit':     '#0EA5E9',
+  'remove-bg':      '#10B981',
+  'upscale':        '#F59E0B',
+  'stylize':        '#EC4899',
+  'text-gen':       '#8B5CF6',
+  'text-sum':       '#14B8A6',
+  'text-trans':     '#3B82F6',
+  'text-rewrite':   '#F97316',
+  'website-gen':    '#6366F1',
+  'audio-tts':      '#06B6D4',
+  // ── New skills ──
+  'image-describe': '#7C3AED',
+  'face-restore':   '#DB2777',
+  'text-grammar':   '#059669',
+  'text-code':      '#EA580C',
+  'text-hashtag':   '#0284C7',
+  'audio-stt':      '#0E7490',
+  'text-extract':   '#7C3AED',
 };
 
 type CategoryFilter = 'all' | 'image' | 'text' | 'audio' | 'web';
@@ -37,17 +45,25 @@ const CATEGORY_CHIPS: { id: CategoryFilter; emoji: string; color: string }[] = [
 
 // Static icon map — labels/descriptions come from translations
 const SKILL_ICONS: Record<string, string> = {
-  'image-gen':    'color-palette-outline',
-  'image-edit':   'pencil-outline',
-  'remove-bg':    'crop-outline',
-  'upscale':      'expand-outline',
-  'stylize':      'color-wand-outline',
-  'text-gen':     'document-text-outline',
-  'text-sum':     'list-outline',
-  'text-trans':   'globe-outline',
-  'text-rewrite': 'refresh-outline',
-  'website-gen':  'laptop-outline',
-  'audio-tts':    'volume-high-outline',
+  'image-gen':      'color-palette-outline',
+  'image-edit':     'pencil-outline',
+  'remove-bg':      'crop-outline',
+  'upscale':        'expand-outline',
+  'stylize':        'color-wand-outline',
+  'text-gen':       'document-text-outline',
+  'text-sum':       'list-outline',
+  'text-trans':     'globe-outline',
+  'text-rewrite':   'refresh-outline',
+  'website-gen':    'laptop-outline',
+  'audio-tts':      'volume-high-outline',
+  // ── New skills ──
+  'image-describe': 'eye-outline',
+  'face-restore':   'happy-outline',
+  'text-grammar':   'checkmark-circle-outline',
+  'text-code':      'code-slash-outline',
+  'text-hashtag':   'pricetag-outline',
+  'audio-stt':      'mic-outline',
+  'text-extract':   'document-attach-outline',
 };
 
 const SKILL_IDS = Object.keys(SKILL_ICONS);

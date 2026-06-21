@@ -7,6 +7,7 @@ import {
 } from 'react-native';
 import WebView from 'react-native-webview';
 import * as ImagePicker from 'expo-image-picker';
+import { useAudioRecorder, useAudioRecorderState, RecordingPresets, AudioModule, setAudioModeAsync } from 'expo-audio';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
@@ -25,16 +26,75 @@ import { ensurePlatformUser } from '../services/auth';
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const EXAMPLE_CARD_WIDTH = SCREEN_WIDTH * 0.68;
 
-// Target languages for the translate skill (value = what the API expects)
+// ── Website Builder Options ───────────────────────────────────────────────────
+
+interface WebsiteOptions {
+  siteName: string;
+  siteType: string;
+  colorTheme: string;
+  sections: string[];
+  styleTone: string;
+  siteLanguage: string;
+}
+
+const SITE_TYPES = [
+  { value: 'portfolio', label: '🎨 Portfolio' },
+  { value: 'business', label: '💼 Business' },
+  { value: 'restaurant', label: '🍽️ Restaurant' },
+  { value: 'blog', label: '📝 Blog' },
+  { value: 'saas', label: '🚀 SaaS' },
+  { value: 'ecommerce', label: '🛒 E-Commerce' },
+  { value: 'landing', label: '🎯 Landing Page' },
+];
+
+const COLOR_THEMES = [
+  { value: 'light', label: '☀️ Light', color: '#F8FAFC' },
+  { value: 'dark', label: '🌙 Dark', color: '#1E293B' },
+  { value: 'blue', label: '💙 Blue', color: '#3B82F6' },
+  { value: 'purple', label: '💜 Purple', color: '#8B5CF6' },
+  { value: 'green', label: '💚 Green', color: '#10B981' },
+  { value: 'red', label: '❤️ Red', color: '#EF4444' },
+  { value: 'orange', label: '🧡 Orange', color: '#F97316' },
+];
+
+const WEBSITE_SECTIONS = [
+  { value: 'hero', label: 'Hero' },
+  { value: 'about', label: 'About' },
+  { value: 'features', label: 'Features' },
+  { value: 'gallery', label: 'Gallery' },
+  { value: 'testimonials', label: 'Reviews' },
+  { value: 'pricing', label: 'Pricing' },
+  { value: 'faq', label: 'FAQ' },
+  { value: 'contact', label: 'Contact' },
+  { value: 'team', label: 'Team' },
+  { value: 'blog', label: 'Blog' },
+];
+
+const STYLE_TONES = [
+  { value: 'minimal', label: '🪴 Minimal' },
+  { value: 'bold', label: '⚡ Bold' },
+  { value: 'elegant', label: '✨ Elegant' },
+  { value: 'playful', label: '🎪 Playful' },
+  { value: 'corporate', label: '🏢 Corporate' },
+];
+
+// ── Target languages for the translate skill (value = what the API expects)
 const TARGET_LANGUAGES = [
-  { code: 'th', flag: '🇹🇭', value: 'Thai' },
-  { code: 'en', flag: '🇺🇸', value: 'English' },
-  { code: 'ja', flag: '🇯🇵', value: 'Japanese' },
-  { code: 'zh', flag: '🇨🇳', value: 'Chinese' },
-  { code: 'ko', flag: '🇰🇷', value: 'Korean' },
-  { code: 'fr', flag: '🇫🇷', value: 'French' },
-  { code: 'de', flag: '🇩🇪', value: 'German' },
-  { code: 'es', flag: '🇪🇸', value: 'Spanish' },
+  { code: 'th',  flag: '🇹🇭', value: 'Thai' },
+  { code: 'en',  flag: '🇺🇸', value: 'English' },
+  { code: 'id',  flag: '🇮🇩', value: 'Indonesian' },
+  { code: 'ms',  flag: '🇲🇾', value: 'Malay' },
+  { code: 'vi',  flag: '🇻🇳', value: 'Vietnamese' },
+  { code: 'fil', flag: '🇵🇭', value: 'Filipino' },
+  { code: 'km',  flag: '🇰🇭', value: 'Khmer' },
+  { code: 'lo',  flag: '🇱🇦', value: 'Lao' },
+  { code: 'my',  flag: '🇲🇲', value: 'Burmese' },
+  { code: 'ja',  flag: '🇯🇵', value: 'Japanese' },
+  { code: 'zh',  flag: '🇨🇳', value: 'Chinese' },
+  { code: 'ko',  flag: '🇰🇷', value: 'Korean' },
+  { code: 'fr',  flag: '🇫🇷', value: 'French' },
+  { code: 'de',  flag: '🇩🇪', value: 'German' },
+  { code: 'es',  flag: '🇪🇸', value: 'Spanish' },
 ];
 
 export default function SkillDetailScreen() {
@@ -53,10 +113,32 @@ export default function SkillDetailScreen() {
   const [result, setResult] = useState<SkillResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [image, setImage] = useState<string | null>(null);
+  // ── Speech-to-text recording (audio-stt) ──
+  const [audioB64, setAudioB64] = useState<string | null>(null);
+  const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
+  const recorderState = useAudioRecorderState(audioRecorder);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
   const [activeExampleIndex, setActiveExampleIndex] = useState(0);
   // Translate skill: default target = opposite of app language for convenience
   const [targetLang, setTargetLang] = useState(lang === 'en' ? 'Thai' : 'English');
+
+  // Website builder options (only used for website-gen)
+  const [websiteOptions, setWebsiteOptions] = useState<WebsiteOptions>({
+    siteName: '',
+    siteType: 'portfolio',
+    colorTheme: 'light',
+    sections: ['hero', 'about', 'features', 'contact'],
+    styleTone: 'minimal',
+    siteLanguage: lang === 'th' ? 'Thai' : 'English',
+  });
+  const toggleSection = (val: string) => {
+    setWebsiteOptions(prev => ({
+      ...prev,
+      sections: prev.sections.includes(val)
+        ? prev.sections.filter(s => s !== val)
+        : [...prev.sections, val],
+    }));
+  };
 
   const templates = (SKILL_TEMPLATES[id] || []).map(tmpl => localizeTemplate(tmpl, lang));
   const skillCategory = getSkillCategory(id);
@@ -64,6 +146,19 @@ export default function SkillDetailScreen() {
 
   // Backend reachability check (offline banner)
   const [serverOnline, setServerOnline] = useState<boolean | null>(null);
+  const [pingLoading, setPingLoading] = useState(false);
+
+  const checkServer = React.useCallback(async () => {
+    if (pingLoading) return;
+    setPingLoading(true);
+    setServerOnline(null); // show neutral state while checking
+    const ok = await pingApi();
+    setServerOnline(ok);
+    // If server just came back online, clear any stale offline-related error
+    if (ok) setError(prev => (prev?.includes('เซิร์ฟเวอร์') || prev?.includes('server') || prev?.includes('network') || prev?.includes('เชื่อมต่อ')) ? null : prev);
+    setPingLoading(false);
+  }, [pingLoading]);
+
   React.useEffect(() => {
     let cancelled = false;
     if (skillReady) {
@@ -72,11 +167,22 @@ export default function SkillDetailScreen() {
     return () => { cancelled = true; };
   }, [skillReady]);
 
+  // Auto-clear error when server goes offline to avoid dual-banner confusion
+  React.useEffect(() => {
+    if (serverOnline === false) {
+      setError(null);
+    }
+  }, [serverOnline]);
+
   // Icon map — names/descriptions come from translations
   const skillIconMap: Record<string, string> = {
     'image-gen': '🎨', 'image-edit': '✏️', 'remove-bg': '✂️', 'upscale': '🔍',
     'stylize': '🖌️', 'text-gen': '📝', 'text-sum': '📋', 'text-trans': '🌐',
     'text-rewrite': '♻️', 'website-gen': '💻', 'audio-tts': '🔊',
+    // New skills
+    'image-describe': '👁️', 'face-restore': '✨',
+    'text-grammar': '✅', 'text-code': '</>', 'text-hashtag': '#',
+    'audio-stt': '🎙️', 'text-extract': '🧩',
   };
 
   const skill = {
@@ -101,14 +207,54 @@ export default function SkillDetailScreen() {
     }
   };
 
+  const startRecording = async () => {
+    try {
+      const perm = await AudioModule.requestRecordingPermissionsAsync();
+      if (!perm.granted) {
+        Alert.alert(t.common.error, lang === 'th' ? 'กรุณาอนุญาตให้เข้าถึงไมโครโฟนในการตั้งค่า' : 'Please allow microphone access in Settings.');
+        return;
+      }
+      await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
+      setAudioB64(null);
+      setError(null);
+      await audioRecorder.prepareToRecordAsync();
+      audioRecorder.record();
+    } catch {
+      Alert.alert(t.common.error, lang === 'th' ? 'เริ่มบันทึกเสียงไม่ได้' : 'Could not start recording.');
+    }
+  };
+
+  const stopRecording = async () => {
+    try {
+      await audioRecorder.stop();
+      const uri = audioRecorder.uri;
+      if (!uri) return;
+      const res = await fetch(uri);
+      const blob = await res.blob();
+      const b64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(((reader.result as string).split(',')[1]) ?? '');
+        reader.onerror = () => reject(new Error('read failed'));
+        reader.readAsDataURL(blob);
+      });
+      setAudioB64(b64);
+    } catch {
+      Alert.alert(t.common.error, lang === 'th' ? 'บันทึกเสียงไม่สำเร็จ' : 'Could not save recording.');
+    }
+  };
+
   const handleSelectTemplate = (template: PromptTemplate) => {
     setInput(template.prompt);
     setSelectedTemplateId(template.id);
+    setError(null); // clear any previous error when user picks a new template
+    setResult(null);
+    setSavedId(null);
   };
 
   const handleExecute = async () => {
     if (loading) return; // prevent double-submit
-    if (!input.trim() && !image) return;
+    const isStt = id === 'audio-stt';
+    if (isStt ? !audioB64 : (!input.trim() && !image)) return;
     setLoading(true);
     setResult(null);
     setError(null);
@@ -116,7 +262,20 @@ export default function SkillDetailScreen() {
     const skillInput = {
       prompt: input.trim(),
       image,
-      extra: id === 'text-trans' ? { targetLanguage: targetLang } : undefined,
+      audio: audioB64,
+      extra: id === 'text-trans'
+        ? { targetLanguage: targetLang }
+        : id === 'website-gen'
+        ? {
+            template: selectedTemplateId || 'wg-1',
+            siteName: websiteOptions.siteName || 'My Website',
+            siteType: websiteOptions.siteType,
+            colorTheme: websiteOptions.colorTheme,
+            sections: websiteOptions.sections.join(','),
+            styleTone: websiteOptions.styleTone,
+            siteLanguage: websiteOptions.siteLanguage,
+          }
+        : undefined,
     };
     try {
       const res = await executeSkill(id, skillInput);
@@ -328,6 +487,56 @@ export default function SkillDetailScreen() {
       flexDirection: 'row', alignItems: 'center', gap: SPACING.md,
     },
     comingSoonText: { flex: 1, color: colors.warning ?? '#F59E0B', ...TYPOGRAPHY.subheadline, fontWeight: '600' },
+    // ── Website Builder Panel ──
+    wbPanel: {
+      marginHorizontal: LAYOUT.screenPadding,
+      marginTop: SPACING.xl,
+      backgroundColor: colors.surface,
+      borderRadius: isVibrant ? 20 : 12,
+      borderWidth: isVibrant ? 0 : 1,
+      borderColor: colors.borders,
+      overflow: 'hidden',
+      ...(isVibrant && {
+        shadowColor: colors.cardShadow,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1, shadowRadius: 16, elevation: 5,
+      }),
+    },
+    wbPanelHeader: {
+      flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+      paddingHorizontal: SPACING.lg, paddingVertical: SPACING.md,
+      borderBottomWidth: 1, borderBottomColor: colors.borders,
+      backgroundColor: isVibrant ? `${colors.primary}08` : 'transparent',
+    },
+    wbPanelTitle: {
+      ...TYPOGRAPHY.headline, fontWeight: '700',
+      color: isVibrant ? colors.primary : colors.text.primary,
+    },
+    wbSection: { paddingHorizontal: SPACING.lg, paddingTop: SPACING.lg },
+    wbLabel: {
+      ...TYPOGRAPHY.caption, fontWeight: '700',
+      color: colors.text.secondary, marginBottom: SPACING.sm,
+      textTransform: 'uppercase', letterSpacing: 0.5,
+    },
+    wbInput: {
+      backgroundColor: isVibrant ? `${colors.primary}06` : colors.background,
+      borderRadius: BORDER_RADIUS.medium, borderWidth: 1,
+      borderColor: colors.borders,
+      paddingHorizontal: SPACING.md, paddingVertical: SPACING.sm,
+      color: colors.text.primary, ...TYPOGRAPHY.body,
+      marginBottom: SPACING.sm,
+    },
+    wbChip: {
+      borderRadius: BORDER_RADIUS.full,
+      paddingHorizontal: SPACING.md, paddingVertical: 6,
+      marginRight: SPACING.sm, marginBottom: SPACING.sm,
+      borderWidth: 1.5, flexDirection: 'row', alignItems: 'center', gap: 4,
+    },
+    wbChipLabel: { ...TYPOGRAPHY.caption, fontWeight: '600' },
+    wbSectionsWrap: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: SPACING.sm },
+    wbColorDot: { width: 10, height: 10, borderRadius: 5, borderWidth: 1, borderColor: 'rgba(0,0,0,0.1)' },
+    wbDivider: { height: 1, backgroundColor: colors.borders, marginTop: SPACING.md },
+    wbPanelBottom: { height: SPACING.lg },
   });
 
   // Render example card
@@ -487,6 +696,193 @@ export default function SkillDetailScreen() {
             </>
           )}
 
+          {/* ── Website Builder Panel ── */}
+          {id === 'website-gen' && (
+            <View style={styles.wbPanel}>
+              {/* Panel Header */}
+              <View style={styles.wbPanelHeader}>
+                <Text style={styles.wbPanelTitle}>
+                  🛠️ {lang === 'th' ? 'ตั้งค่าเว็บไซต์' : 'Website Settings'}
+                </Text>
+                <View style={{
+                  backgroundColor: `${colors.primary}15`, borderRadius: 8,
+                  paddingHorizontal: 8, paddingVertical: 3,
+                }}>
+                  <Text style={{ ...TYPOGRAPHY.caption, color: colors.primary, fontWeight: '700' }}>
+                    {websiteOptions.sections.length} {lang === 'th' ? 'ส่วน' : 'sections'}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Site Name */}
+              <View style={styles.wbSection}>
+                <Text style={styles.wbLabel}>
+                  🏷️ {lang === 'th' ? 'ชื่อเว็บไซต์' : 'Website Name'}
+                </Text>
+                <TextInput
+                  style={styles.wbInput}
+                  placeholder={lang === 'th' ? 'เช่น "My Portfolio"' : 'e.g. "My Portfolio"'}
+                  placeholderTextColor={colors.text.tertiary}
+                  value={websiteOptions.siteName}
+                  onChangeText={v => setWebsiteOptions(p => ({ ...p, siteName: v }))}
+                  editable={!loading}
+                />
+              </View>
+
+              <View style={styles.wbDivider} />
+
+              {/* Site Type */}
+              <View style={styles.wbSection}>
+                <Text style={styles.wbLabel}>
+                  📁 {lang === 'th' ? 'ประเภทเว็บไซต์' : 'Website Type'}
+                </Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: SPACING.sm }}>
+                  {SITE_TYPES.map(st => {
+                    const active = websiteOptions.siteType === st.value;
+                    return (
+                      <TouchableOpacity
+                        key={st.value}
+                        style={[styles.wbChip, {
+                          backgroundColor: active ? colors.primary : 'transparent',
+                          borderColor: active ? colors.primary : colors.borders,
+                        }]}
+                        onPress={() => setWebsiteOptions(p => ({ ...p, siteType: st.value }))}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={[styles.wbChipLabel, { color: active ? '#FFF' : colors.text.primary }]}>
+                          {st.label}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </ScrollView>
+              </View>
+
+              <View style={styles.wbDivider} />
+
+              {/* Color Theme */}
+              <View style={styles.wbSection}>
+                <Text style={styles.wbLabel}>
+                  🎨 {lang === 'th' ? 'ธีมสี' : 'Color Theme'}
+                </Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: SPACING.sm }}>
+                  {COLOR_THEMES.map(ct => {
+                    const active = websiteOptions.colorTheme === ct.value;
+                    return (
+                      <TouchableOpacity
+                        key={ct.value}
+                        style={[styles.wbChip, {
+                          backgroundColor: active ? colors.primary : 'transparent',
+                          borderColor: active ? colors.primary : colors.borders,
+                        }]}
+                        onPress={() => setWebsiteOptions(p => ({ ...p, colorTheme: ct.value }))}
+                        activeOpacity={0.7}
+                      >
+                        <View style={[styles.wbColorDot, { backgroundColor: ct.color }]} />
+                        <Text style={[styles.wbChipLabel, { color: active ? '#FFF' : colors.text.primary }]}>
+                          {ct.label}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </ScrollView>
+              </View>
+
+              <View style={styles.wbDivider} />
+
+              {/* Sections */}
+              <View style={styles.wbSection}>
+                <Text style={styles.wbLabel}>
+                  📑 {lang === 'th' ? 'ส่วนเนื้อหา (เลือกได้หลายส่วน)' : 'Sections (multi-select)'}
+                </Text>
+                <View style={styles.wbSectionsWrap}>
+                  {WEBSITE_SECTIONS.map(sec => {
+                    const active = websiteOptions.sections.includes(sec.value);
+                    return (
+                      <TouchableOpacity
+                        key={sec.value}
+                        style={[styles.wbChip, {
+                          backgroundColor: active ? `${colors.primary}18` : 'transparent',
+                          borderColor: active ? colors.primary : colors.borders,
+                        }]}
+                        onPress={() => toggleSection(sec.value)}
+                        activeOpacity={0.7}
+                      >
+                        {active && (
+                          <Ionicons name="checkmark-circle" size={13} color={colors.primary} />
+                        )}
+                        <Text style={[styles.wbChipLabel, { color: active ? colors.primary : colors.text.secondary }]}>
+                          {sec.label}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              </View>
+
+              <View style={styles.wbDivider} />
+
+              {/* Style Tone */}
+              <View style={styles.wbSection}>
+                <Text style={styles.wbLabel}>
+                  ✨ {lang === 'th' ? 'สไตล์การออกแบบ' : 'Design Style'}
+                </Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: SPACING.sm }}>
+                  {STYLE_TONES.map(st => {
+                    const active = websiteOptions.styleTone === st.value;
+                    return (
+                      <TouchableOpacity
+                        key={st.value}
+                        style={[styles.wbChip, {
+                          backgroundColor: active ? colors.primary : 'transparent',
+                          borderColor: active ? colors.primary : colors.borders,
+                        }]}
+                        onPress={() => setWebsiteOptions(p => ({ ...p, styleTone: st.value }))}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={[styles.wbChipLabel, { color: active ? '#FFF' : colors.text.primary }]}>
+                          {st.label}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </ScrollView>
+              </View>
+
+              <View style={styles.wbDivider} />
+
+              {/* Language */}
+              <View style={styles.wbSection}>
+                <Text style={styles.wbLabel}>
+                  🌏 {lang === 'th' ? 'ภาษาเว็บไซต์' : 'Website Language'}
+                </Text>
+                <View style={{ flexDirection: 'row', gap: SPACING.sm, marginBottom: SPACING.sm }}>
+                  {[{ value: 'Thai', label: '🇹🇭 ภาษาไทย' }, { value: 'English', label: '🇺🇸 English' }].map(l => {
+                    const active = websiteOptions.siteLanguage === l.value;
+                    return (
+                      <TouchableOpacity
+                        key={l.value}
+                        style={[styles.wbChip, {
+                          backgroundColor: active ? colors.primary : 'transparent',
+                          borderColor: active ? colors.primary : colors.borders,
+                          flex: 1, justifyContent: 'center',
+                        }]}
+                        onPress={() => setWebsiteOptions(p => ({ ...p, siteLanguage: l.value }))}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={[styles.wbChipLabel, { color: active ? '#FFF' : colors.text.primary, textAlign: 'center' }]}>
+                          {l.label}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              </View>
+
+              <View style={styles.wbPanelBottom} />
+            </View>
+          )}
+
           {/* ── Input ── */}
           <View style={styles.inputSection}>
             {!skillReady && (
@@ -503,9 +899,26 @@ export default function SkillDetailScreen() {
                     ? 'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ในขณะนี้ — ตรวจสอบอินเทอร์เน็ตของคุณ'
                     : 'Server unreachable right now — check your connection.'}
                 </Text>
-                <TouchableOpacity onPress={() => { setServerOnline(null); pingApi().then(setServerOnline); }}>
-                  <Ionicons name="refresh" size={18} color={colors.warning ?? '#F59E0B'} />
+                <TouchableOpacity
+                  onPress={checkServer}
+                  disabled={pingLoading}
+                  style={{ opacity: pingLoading ? 0.4 : 1 }}
+                >
+                  <Ionicons
+                    name={pingLoading ? 'hourglass-outline' : 'refresh'}
+                    size={18}
+                    color={colors.warning ?? '#F59E0B'}
+                  />
                 </TouchableOpacity>
+              </View>
+            )}
+            {/* Checking connection... state (null = first load or re-checking) */}
+            {skillReady && serverOnline === null && pingLoading && (
+              <View style={[styles.comingSoonCard, { borderColor: `${colors.primary}40`, backgroundColor: `${colors.primary}08` }]}>
+                <ActivityIndicator size={16} color={colors.primary} />
+                <Text style={[styles.comingSoonText, { color: colors.primary }]}>
+                  {lang === 'th' ? 'กำลังตรวจสอบการเชื่อมต่อ...' : 'Checking connection...'}
+                </Text>
               </View>
             )}
             {id === 'text-trans' && (
@@ -539,6 +952,36 @@ export default function SkillDetailScreen() {
               </>
             )}
 
+            {/* ── Prominent image upload zone for image-describe & face-restore ── */}
+            {(id === 'image-describe' || id === 'face-restore') && !image && (
+              <TouchableOpacity
+                onPress={pickImage}
+                disabled={loading}
+                activeOpacity={0.75}
+                style={{
+                  marginBottom: SPACING.lg,
+                  borderRadius: isVibrant ? 20 : 12,
+                  borderWidth: 2,
+                  borderColor: `${colors.primary}40`,
+                  borderStyle: 'dashed',
+                  backgroundColor: `${colors.primary}08`,
+                  padding: SPACING.xxl,
+                  alignItems: 'center',
+                  gap: SPACING.md,
+                }}
+              >
+                <Ionicons name="cloud-upload-outline" size={40} color={colors.primary} />
+                <Text style={{ ...TYPOGRAPHY.headline, color: colors.primary, fontWeight: '700' }}>
+                  {lang === 'th' ? 'อัปโหลดรูปภาพ' : 'Upload Image'}
+                </Text>
+                <Text style={{ ...TYPOGRAPHY.caption, color: colors.text.secondary, textAlign: 'center' }}>
+                  {id === 'image-describe'
+                    ? (lang === 'th' ? 'แตะเพื่อเลือกรูปที่ต้องการวิเคราะห์' : 'Tap to choose an image to analyze')
+                    : (lang === 'th' ? 'แตะเพื่อเลือกรูปใบหน้าที่ต้องการฟื้นฟู' : 'Tap to choose a face photo to restore')}
+                </Text>
+              </TouchableOpacity>
+            )}
+
             <View style={styles.sectionRow}>
               <Text style={styles.sectionLabel}>📥 {t.skill.inputLabel}</Text>
               {input.length > 0 && (
@@ -548,28 +991,79 @@ export default function SkillDetailScreen() {
               )}
             </View>
 
-            <View style={styles.inputWrapper}>
-              <TextInput
-                style={styles.input}
-                placeholder={skillCategory === 'image'
-                  ? t.skill.placeholders.image
-                  : skillCategory === 'audio'
-                  ? t.skill.placeholders.audio
-                  : t.skill.placeholders.text}
-                placeholderTextColor={colors.text.tertiary}
-                value={input}
-                onChangeText={txt => { setInput(txt); setSelectedTemplateId(null); }}
-                editable={!loading}
-                multiline
-              />
-              <View style={styles.inputActions}>
-                {(skillCategory === 'image' || id === 'image-edit' || id === 'remove-bg' || id === 'upscale') && (
-                  <TouchableOpacity style={styles.inputActionBtn} onPress={pickImage} disabled={loading}>
-                    <Ionicons name="image-outline" size={20} color={colors.primary} />
-                  </TouchableOpacity>
+            {/* audio-stt uses a recorder instead of a text box */}
+            {id === 'audio-stt' && (
+              <View style={{ alignItems: 'center', paddingVertical: SPACING.lg }}>
+                <TouchableOpacity
+                  onPress={recorderState.isRecording ? stopRecording : startRecording}
+                  disabled={loading}
+                  activeOpacity={0.85}
+                  style={{
+                    width: 96, height: 96, borderRadius: 48,
+                    backgroundColor: recorderState.isRecording ? colors.error : colors.primary,
+                    justifyContent: 'center', alignItems: 'center',
+                    shadowColor: recorderState.isRecording ? colors.error : colors.primary,
+                    shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.35, shadowRadius: 12, elevation: 6,
+                  }}
+                >
+                  <Ionicons name={recorderState.isRecording ? 'stop' : 'mic'} size={40} color="#FFF" />
+                </TouchableOpacity>
+                <Text style={{ marginTop: SPACING.md, ...TYPOGRAPHY.callout, color: colors.text.secondary }}>
+                  {recorderState.isRecording
+                    ? (lang === 'th' ? 'กำลังบันทึก… แตะเพื่อหยุด' : 'Recording… tap to stop')
+                    : audioB64
+                    ? (lang === 'th' ? '✅ บันทึกเสียงแล้ว — กดประมวลผล' : '✅ Recorded — tap Execute')
+                    : (lang === 'th' ? 'แตะไมค์เพื่อเริ่มบันทึก' : 'Tap the mic to start recording')}
+                </Text>
+                {recorderState.isRecording && (
+                  <Text style={{ marginTop: 4, ...TYPOGRAPHY.caption, color: colors.text.tertiary }}>
+                    {Math.floor((recorderState.durationMillis ?? 0) / 1000)}s
+                  </Text>
                 )}
               </View>
-            </View>
+            )}
+
+            {/* face-restore needs no text input — image only */}
+            {id !== 'face-restore' && id !== 'audio-stt' && (
+              <View style={styles.inputWrapper}>
+                <TextInput
+                  style={styles.input}
+                  placeholder={
+                    id === 'image-describe'
+                      ? (lang === 'th'
+                          ? '💬 ถามคำถามเกี่ยวกับรูปภาพ (ไม่บังคับ) เช่น "มีอะไรในรูปนี้?"'
+                          : '💬 Ask about the image (optional), e.g. "What objects are in this photo?"')
+                      : skillCategory === 'image'
+                      ? t.skill.placeholders.image
+                      : skillCategory === 'audio'
+                      ? t.skill.placeholders.audio
+                      : id === 'website-gen'
+                      ? (lang === 'th'
+                          ? 'บรรยายเนื้อหาและเป้าหมายของเว็บไซต์ เช่น "เว็บพอร์ตโฟลิโอสำหรับนักออกแบบกราฟิก..."'
+                          : 'Describe your website content and goals, e.g. "A portfolio for a graphic designer..."')
+                      : t.skill.placeholders.text
+                  }
+                  placeholderTextColor={colors.text.tertiary}
+                  value={input}
+                  onChangeText={txt => {
+                    setInput(txt);
+                    const activeTemplate = templates.find(t => t.id === selectedTemplateId);
+                    if (activeTemplate && txt.trim() !== activeTemplate.prompt.trim()) {
+                      setSelectedTemplateId(null);
+                    }
+                  }}
+                  editable={!loading}
+                  multiline
+                />
+                <View style={styles.inputActions}>
+                  {(skillCategory === 'image' || id === 'image-describe') && (
+                    <TouchableOpacity style={styles.inputActionBtn} onPress={pickImage} disabled={loading}>
+                      <Ionicons name="image-outline" size={20} color={colors.primary} />
+                    </TouchableOpacity>
+                  )}
+                </View>
+              </View>
+            )}
 
             {input.length > 0 && (
               <Text style={styles.charCount}>{input.length} {t.skill.chars}</Text>
@@ -587,9 +1081,13 @@ export default function SkillDetailScreen() {
             <Button
               title={!skillReady
                 ? `🚧 ${t.aiManager?.wallet?.comingSoon ?? 'Coming Soon'}`
-                : loading ? t.skill.processing : `${t.skill.execute} ${skill.icon}`}
+                : serverOnline === false
+                ? (lang === 'th' ? '🔌 ออฟไลน์อยู่' : '🔌 Offline')
+                : loading
+                ? t.skill.processing
+                : `${t.skill.execute} ${skill.icon}`}
               onPress={handleExecute}
-              disabled={!skillReady || loading || (!input.trim() && !image)}
+              disabled={!skillReady || loading || serverOnline === false || (id === 'audio-stt' ? !audioB64 : (!input.trim() && !image)) || (['image-describe', 'face-restore'].includes(id) && !image)}
               size="large"
             />
 
@@ -669,7 +1167,7 @@ export default function SkillDetailScreen() {
                         }}
                       >
                         <Text style={{ color: '#FFF', ...TYPOGRAPHY.caption, fontWeight: '700' }}>
-                          {savedId ? '✓ Saved' : '💾 Save'}
+                          {savedId ? `✓ ${t.common.success}` : `💾 ${t.common.save}`}
                         </Text>
                       </TouchableOpacity>
                     </View>
@@ -696,14 +1194,16 @@ export default function SkillDetailScreen() {
                   </>
                 ) : (
                   <Card backgroundColor={colors.primary} padding={SPACING.lg}>
-                    <Text style={styles.resultText}>{resultDisplayText}</Text>
+                    <Text style={[styles.resultText, id === 'text-code' && { fontFamily: 'Courier', fontSize: 12, lineHeight: 18 }]}>
+                      {resultDisplayText}
+                    </Text>
                   </Card>
                 )}
               </View>
             )}
 
             {/* ── Save & Share row ── */}
-            {result && (
+            {result && result.kind !== 'website' && (
               <View style={{ flexDirection: 'row', gap: SPACING.md, marginTop: SPACING.lg }}>
                 {/* Save to Library */}
                 <TouchableOpacity
@@ -778,7 +1278,7 @@ export default function SkillDetailScreen() {
                 >
                   <Ionicons name="share-outline" size={18} color="#FFF" />
                   <Text style={{ ...TYPOGRAPHY.callout, fontWeight: '700', color: '#FFF' }}>
-                    Share
+                    {t.library.share.title}
                   </Text>
                 </TouchableOpacity>
               </View>
