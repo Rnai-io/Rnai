@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rnai.io — สรุปโปรเจกต์ v2.0</title>
+<style>
+  :root{
+    --bg:#070708; --surface:#111114; --surface2:#17171c; --line:rgba(255,255,255,.09);
+    --txt:#f4f4f6; --muted:#a1a1aa; --dim:#71717a; --brand:#D77757; --brand2:#8a4b35;
+    --green:#10b981; --blue:#0EA5E9; --purple:#9333EA; --amber:#F59E0B;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+       line-height:1.7;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:920px;margin:0 auto;padding:40px 22px 80px}
+  a{color:var(--brand)}
+  h1,h2,h3{line-height:1.25;font-weight:700}
+  code{background:rgba(255,255,255,.07);padding:1px 6px;border-radius:6px;font-size:.88em;
+       font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  /* header */
+  .hero{display:flex;align-items:center;gap:14px;margin-bottom:6px}
+  .logo{width:48px;height:48px;border-radius:13px;background:linear-gradient(135deg,var(--brand),var(--brand2));
+        display:flex;align-items:center;justify-content:center;font-weight:900;font-size:22px;color:#fff;
+        box-shadow:0 8px 24px -6px rgba(215,119,87,.5)}
+  .hero h1{font-size:30px;margin:0}
+  .hero .brand{color:var(--brand)}
+  .sub{color:var(--muted);margin:2px 0 20px;font-size:15px}
+  .pills{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:34px}
+  .pill{font-size:12.5px;font-weight:600;padding:6px 12px;border-radius:999px;border:1px solid var(--line)}
+  .pill.ok{background:rgba(16,185,129,.12);color:#34d399;border-color:rgba(16,185,129,.3)}
+  .pill.b{background:rgba(215,119,87,.12);color:var(--brand);border-color:rgba(215,119,87,.3)}
+  /* sections */
+  section{margin:0 0 30px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:22px 24px}
+  section h2{font-size:19px;margin:0 0 4px;display:flex;align-items:center;gap:10px}
+  .tag{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--dim)}
+  section .lead{color:var(--muted);font-size:14px;margin:0 0 14px}
+  ul{margin:8px 0;padding-left:0;list-style:none}
+  li{position:relative;padding:5px 0 5px 24px;color:#d4d4d8;font-size:14.5px}
+  li::before{content:"";position:absolute;left:4px;top:13px;width:7px;height:7px;border-radius:50%;background:var(--brand)}
+  li b{color:var(--txt);font-weight:600}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}.hero h1{font-size:24px}}
+  .card{background:var(--surface2);border:1px solid var(--line);border-radius:13px;padding:14px 16px}
+  .card h3{font-size:14px;margin:0 0 6px;color:var(--txt)}
+  .card p{margin:0;color:var(--muted);font-size:13px}
+  /* arch diagram */
+  .arch{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+  .layer{display:flex;align-items:center;gap:12px;background:var(--surface2);border:1px solid var(--line);
+         border-radius:12px;padding:12px 14px}
+  .layer .n{flex:none;width:26px;height:26px;border-radius:8px;background:rgba(215,119,87,.18);color:var(--brand);
+            font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center}
+  .layer .t{font-size:14px}.layer .t b{color:var(--txt)}
+  .arrow{text-align:center;color:var(--dim);font-size:13px;margin:-4px 0}
+  /* table */
+  table{width:100%;border-collapse:collapse;margin-top:6px;font-size:13.5px}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--dim);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+  td code{font-size:12px}
+  .status-ok{color:#34d399;font-weight:600}
+  .status-pend{color:var(--amber);font-weight:600}
+  .note{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:12px;
+        padding:12px 16px;font-size:13.5px;color:#fcd9a3;margin-top:14px}
+  .ok-note{background:rgba(16,185,129,.08);border-color:rgba(16,185,129,.25);color:#86efac}
+  footer{color:var(--dim);font-size:12.5px;text-align:center;margin-top:36px;border-top:1px solid var(--line);padding-top:20px}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:30px}
+  @media(max-width:640px){.kpis{grid-template-columns:repeat(2,1fr)}}
+  .kpi{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;text-align:center}
+  .kpi .v{font-size:24px;font-weight:800;color:var(--brand)}
+  .kpi .l{font-size:11.5px;color:var(--muted);margin-top:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="logo">R</div>
+    <div>
+      <h1>Rnai<span class="brand">.io</span> — สรุปโปรเจกต์</h1>
+    </div>
+  </div>
+  <p class="sub">เวอร์ชัน <b>2.0.0</b> · อัปเดต 21 มิ.ย. 2026 · แพลตฟอร์ม AI (มือถือ + เว็บ + backend + ระบบสำรอง self-hosted)</p>
+
+  <div class="pills">
+    <span class="pill ok">● Backend ขึ้น Production แล้ว</span>
+    <span class="pill ok">● Self-hosted Backup ทำงาน</span>
+    <span class="pill b">15 ภาษา</span>
+    <span class="pill b">18 สกิล</span>
+    <span class="pill b">Failover 3 ชั้น</span>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="v">2.0.0</div><div class="l">เวอร์ชันแอป</div></div>
+    <div class="kpi"><div class="v">15</div><div class="l">ภาษา (th/en + อาเซียน)</div></div>
+    <div class="kpi"><div class="v">18</div><div class="l">สกิลในแอป</div></div>
+    <div class="kpi"><div class="v">13/13</div><div class="l">สกิลมี failover</div></div>
+  </div>
+
+  <section>
+    <span class="tag">ภาพรวม</span>
+    <h2>สิ่งที่ทำในรอบนี้</h2>
+    <p class="lead">ยกระดับทั้งระบบเป็น v2.0 ใน 4 ส่วนหลัก พร้อม deploy จริง: แอปมือถือ, backend (Vercel), ระบบสำรอง self-hosted (Modal), และชุดสร้างโมเดล Rnai LLM ของตัวเอง</p>
+  </section>
+
+  <section>
+    <span class="tag">ส่วนที่ 1</span>
+    <h2>📱 แอปมือถือ (rnai-mobile · Expo)</h2>
+    <ul>
+      <li><b>15 ภาษา</b> — คงของเดิม 8 ภาษา + เพิ่มอาเซียนครบ (Indonesian, Malay, Vietnamese, Filipino, Khmer, Lao, Burmese) ผ่าน shared language map</li>
+      <li><b>จำภาษาที่เลือก</b> — บันทึกลง AsyncStorage จำค่าข้ามการปิดแอป</li>
+      <li><b>หน้านโยบาย/ข้อกำหนดในแอป</b> — ฉบับทางการ TH/EN + หมายเหตุแปลในอีก 13 ภาษา (เลิกลิงก์ออกเว็บ)</li>
+      <li><b>เพิ่ม 2 สกิล (16 → 18)</b> — Speech-to-Text (อัดเสียงจริงด้วย expo-audio) และ Extract Data (ข้อความ → JSON)</li>
+      <li><b>Failover ระดับแอป</b> — สลับไป backend สำรองอัตโนมัติเมื่อหลักล่ม (<code>EXPO_PUBLIC_API_FALLBACK_URL</code>)</li>
+      <li><b>แก้การ์ดโมเดลให้ตรงจริง</b> — เอาปุ่มดาวน์โหลดปลอมออก แสดงสถานะ cloud/Ollama ตามจริง</li>
+      <li><b>เลขเวอร์ชัน 2.0.0</b> + แก้ <code>tsconfig</code> ที่บล็อก typecheck</li>
+    </ul>
+  </section>
+
+  <section>
+    <span class="tag">ส่วนที่ 2</span>
+    <h2>🖥️ Backend + เว็บ (rnai-platform · Next.js → Vercel)</h2>
+    <ul>
+      <li><b>Self-hosted backup provider</b> — เสียบเป็น failover ตัวสุดท้ายใน router (vLLM/SDXL/Whisper/MMS)</li>
+      <li><b>ต่อ failover ครบ 13/13 สกิล</b> — text/image/audio/website รวมถึง STT</li>
+      <li><b>เพิ่ม <code>GET /api/v1/status</code></b> — รายงานสถานะ provider + backup (สาธารณะ ไม่มี secret)</li>
+      <li><b>เว็บ UI ใหม่</b> — navbar responsive (มือถือมีเมนูแฮมเบอร์เกอร์ ไม่ล้นจอ), การ์ดโปสเตอร์ cinematic, แก้ gradient หัวเรื่องให้อ่านง่าย</li>
+      <li><b>.env.example</b> — เพิ่มตัวแปร <code>SELF_*</code> + เติมคีย์ infra ที่ขาด (Upstash/Stripe/Cloudinary/CRON)</li>
+    </ul>
+    <div class="note ok-note">✅ Deploy production แล้ว — <code>https://rnai-io.vercel.app</code> · <code>/api/v1/status</code> ตอบ <code>operational</code> · provider ครบ 4 ตัว</div>
+  </section>
+
+  <section>
+    <span class="tag">ส่วนที่ 3</span>
+    <h2>🛡️ ระบบสำรอง Self-hosted (Modal)</h2>
+    <p class="lead">โมเดลเปิดที่เรา host เอง เป็นชั้นสำรองสุดท้ายเมื่อผู้ให้บริการภายนอกล่ม — scale-to-zero (idle ไม่เสียเงิน)</p>
+    <div class="grid">
+      <div class="card"><h3>serve (GPU)</h3><p>vLLM · Qwen2.5-7B · OpenAI-compatible /v1/chat/completions — ครอบคลุมสกิลข้อความทั้งหมด</p></div>
+      <div class="card"><h3>media (GPU)</h3><p>SDXL (รูป) + Whisper (STT) + MMS (เสียง) รวมใน container เดียว — /generate /transcribe /tts</p></div>
+    </div>
+    <div class="note ok-note">✅ Deploy ขึ้น Modal แล้ว · ทดสอบ <code>/health</code> = <code>{"ok":true}</code> · status backup ทั้ง 4 ช่อง <code>configured:true</code> · พิสูจน์ <code>reachable:true</code> เมื่อ container อุ่น</div>
+    <p class="lead" style="margin-top:12px">มีทางเลือกอื่นเตรียมไว้ด้วย: RunPod (official vLLM worker) และ docker-compose สำหรับ VPS/CPU</p>
+  </section>
+
+  <section>
+    <span class="tag">ส่วนที่ 4</span>
+    <h2>🧠 ชุดสร้าง Rnai LLM ของตัวเอง</h2>
+    <p class="lead">ครบวงจร fine-tune โมเดลแบรนด์ Rnai (ผู้ช่วยทั่วไป ไทย/อาเซียน 7–8B QLoRA)</p>
+    <ul>
+      <li><b>แผน + base model</b> — แนะนำ Qwen2.5-7B-Instruct (รองรับไทย, license เปิด)</li>
+      <li><b>seed dataset</b> — ตัวอย่างโทนแบรนด์ + ไทย/อาเซียน + พฤติกรรมสกิล + การปฏิเสธอย่างสุภาพ</li>
+      <li><b>ขยายข้อมูลอัตโนมัติ</b> — <code>expand_dataset.py</code> ใช้ Gemini สร้างหลักพันตัวอย่าง + กรองซ้ำ/ตรวจคุณภาพ</li>
+      <li><b>เทรนบนคลาวด์</b> — <code>modal_train.py</code> (QLoRA บน Modal GPU ไม่ต้องเช่าเครื่อง)</li>
+      <li><b>ประเมินผล</b> — <code>eval_rnai_llm.py</code> + ชุดทดสอบ ใช้ Gemini เป็นกรรมการ (helpfulness/language/persona/safety + เทียบ base)</li>
+    </ul>
+    <p class="lead" style="margin-top:10px">ผลที่เทรนเสร็จชื่อ <code>rnai-llm</code> เสียบเข้าระบบสำรองได้ทันที (<code>SELF_VLLM_MODEL=rnai-llm</code>)</p>
+  </section>
+
+  <section>
+    <span class="tag">สถาปัตยกรรม</span>
+    <h2>🔁 ความทนทาน 3 ชั้น</h2>
+    <div class="arch">
+      <div class="layer"><span class="n">1</span><span class="t"><b>แอป</b> — backend หลักล่ม → สลับไป backend สำรอง (EXPO_PUBLIC_API_FALLBACK_URL)</span></div>
+      <div class="arrow">↓ ถ้ายังล่ม</div>
+      <div class="layer"><span class="n">2</span><span class="t"><b>Backend</b> — provider ภายนอกล่ม (Gemini/Together/OpenRouter/HF) → สลับ provider + circuit breaker</span></div>
+      <div class="arrow">↓ ถ้า provider ภายนอกล่มหมด</div>
+      <div class="layer"><span class="n">3</span><span class="t"><b>Self-hosted</b> — โมเดลเปิดบน Modal ที่ไม่พึ่งใคร (vLLM/SDXL/Whisper/MMS)</span></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="tag">สถานะ Deploy</span>
+    <h2>🚀 ขึ้นใช้งานแล้ว / ที่เหลือ</h2>
+    <table>
+      <tr><th>รายการ</th><th>สถานะ</th></tr>
+      <tr><td>Backend v2.0 → Vercel production</td><td class="status-ok">✅ ขึ้นแล้ว</td></tr>
+      <tr><td>Self-hosted backup → Modal (serve + media)</td><td class="status-ok">✅ ขึ้นแล้ว</td></tr>
+      <tr><td>Env <code>SELF_*</code> ครบ 4 + redeploy</td><td class="status-ok">✅ ตั้งแล้ว</td></tr>
+      <tr><td>push โค้ดขึ้น GitHub (2 repo)</td><td class="status-pend">⏳ รอ commit/push</td></tr>
+      <tr><td>เว็บ UI ใหม่ — redeploy ให้เห็นจริง</td><td class="status-ok">✅ deploy แล้ว</td></tr>
+      <tr><td>แอปมือถือ — <code>npm install</code> + prebuild + EAS build</td><td class="status-pend">⏳ ทำบนเครื่อง</td></tr>
+      <tr><td>เทรน Rnai LLM (expand → train → eval)</td><td class="status-pend">⏳ เมื่อพร้อม</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <span class="tag">ความปลอดภัย</span>
+    <h2>🔒 ตรวจแล้ว</h2>
+    <ul>
+      <li>ทั้ง 2 repo: <code>.env.local</code> / <code>.env</code> ถูก gitignore — <b>ไม่มี secret หลุดขึ้น git</b></li>
+      <li>track เฉพาะ <code>.env.example</code> (placeholder) · <code>android/app/debug.keystore</code> เป็น debug มาตรฐาน ปลอดภัย</li>
+      <li>เอกสาร/นโยบายควรให้ทนายตรวจก่อนใช้จริง (PDPA/GDPR/App Store)</li>
+    </ul>
+    <div class="note">⚠️ เตือน: หาก HF/API token เคยถูกวางในที่สาธารณะ ควรเพิกถอนแล้วสร้างใหม่ และอย่าวาง secret ในแชท/ที่แชร์</div>
+  </section>
+
+  <section>
+    <span class="tag">ส่งมอบ</span>
+    <h2>📦 เอกสาร &amp; สคริปต์ (rnai-mobile/docs)</h2>
+    <table>
+      <tr><th>ที่อยู่</th><th>คือ</th></tr>
+      <tr><td><code>docs/skill-api-report.md</code></td><td>รายงานสกิล↔API + สถานะโมเดล</td></tr>
+      <tr><td><code>docs/rnai-backup-ai-architecture.md</code></td><td>พิมพ์เขียวระบบสำรอง</td></tr>
+      <tr><td><code>docs/reference/deploy/</code></td><td>Modal/RunPod/compose + RUNBOOK</td></tr>
+      <tr><td><code>docs/reference/training/</code></td><td>ชุดสร้าง Rnai LLM (plan/seed/train/expand/eval)</td></tr>
+      <tr><td><code>legal/</code></td><td>Privacy/Terms เผยแพร่ (md + html, TH/EN)</td></tr>
+      <tr><td><code>docs/DEPLOY.md</code></td><td>checklist deploy ทั้ง 2 รีโป</td></tr>
+    </table>
+  </section>
+
+  <footer>
+    Rnai.io v2.0 · เอกสารสรุปสร้างโดยอัตโนมัติ · 21 มิ.ย. 2026<br>
+    ทุกส่วนผ่าน typecheck/ตรวจสอบ · backend + ระบบสำรอง ขึ้น production แล้ว
+  </footer>
+
+</div>
+</body>
+</html>
