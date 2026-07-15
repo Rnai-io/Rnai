@@ -17,11 +17,14 @@
 | ไฟล์ | คือ |
 |---|---|
 | `rnai_dataset.sample.jsonl` | ตัวอย่าง dataset (โทนแบรนด์ + ไทย/อาเซียน + พฤติกรรมสกิล) — ใช้เป็นแม่แบบ |
+| `rnai_coder.sample.jsonl` | **Builder track** — ตัวอย่างสร้างเว็บ/React/Python/API/debug (ไทย+อังกฤษ) |
 | `train_rnai_llm.py` | สคริปต์ QLoRA fine-tune (Unsloth) บน GPU 24GB (เครื่องตัวเอง/เช่า) |
-| `modal_train.py` | **เทรนบนคลาวด์ Modal — ไม่ต้องเช่าเครื่องเอง** (แนะนำ) |
+| `rnai_llm_colab.ipynb` | **เทรนฟรีบน Google Colab (T4)** — Unsloth pin เวอร์ชันให้ ไม่เจอปัญหา dependency |
+| `modal_train.py` | เทรนบนคลาวด์ Modal (ถ้าเจอ version clash ให้ใช้ Colab แทน) |
 | `expand_dataset.py` | **ขยาย seed → หลักพันตัวอย่างด้วย Gemini** (กรองซ้ำ/ตรวจคุณภาพ) |
 | `rnai_eval.jsonl` | ชุดทดสอบ (ไทย/อาเซียน + สกิล + ความปลอดภัย) |
 | `eval_rnai_llm.py` | **ประเมินผล + เทียบ base** ด้วย LLM-as-judge (Gemini) ออก scorecard |
+| `check_dataset.py` | **ตรวจคุณภาพ dataset ก่อนเทรน** (validate/ดูดซ้ำ/สถิติ/code coverage) |
 | `requirements.txt` | dependency ของชุดเทรน |
 
 ---
@@ -92,6 +95,27 @@ python eval_rnai_llm.py --endpoint <rnai-llm-url> --model rnai-llm \
    --baseline-endpoint <base-url> --baseline-model base
 ```
 สคริปต์จะยิงชุด `rnai_eval.jsonl` (บุคลิก/ภาษาอาเซียน/สกิล/ความปลอดภัย) แล้วให้ **Gemini เป็นกรรมการ** ให้คะแนน helpfulness / language / persona (1-5) + safety pass-fail และ win-rate เทียบ base → ออกเป็น scorecard + `eval_results.json`
+
+## 4.5 Builder track — ให้ Rnai LLM สร้างเว็บ/แอป/ซอฟต์แวร์
+
+แบบเฟส (ตามที่เลือก: สมดุล = เทรนโค้ดทับบน Qwen2.5-7B ทั่วไป ไม่ทิ้งไทย/อาเซียน)
+
+**เฟส 1 — สร้างโค้ด one-shot (ทำได้เลย):**
+1. ขยายชุดข้อมูลโค้ด: `python expand_dataset.py --mode coder --target 1500`
+   → ได้ `rnai_coder.train.jsonl` (สร้างเว็บ/React/Python/API/debug/SQL/Tailwind/Dockerfile)
+2. รวมกับชุดทั่วไป แล้วเทรนรวม (โมเดลเดียวเก่งทั้งคุย + โค้ด):
+   ```bash
+   cat rnai_dataset.train.jsonl rnai_coder.train.jsonl > rnai_all.train.jsonl
+   RNAI_DATA=rnai_all.train.jsonl python3 -m modal run modal_train.py   # เลือกไฟล์ผ่าน env
+   ```
+3. เสิร์ฟแล้วต่อเข้าสกิล `website-gen` / `text-code` ในแอปได้ทันที
+- อยากเก่งโค้ดเป็นพิเศษ: เปลี่ยน `--base unsloth/Qwen2.5-Coder-7B-Instruct` (แลกกับไทย/อาเซียนอ่อนลงเล็กน้อย)
+
+**เฟส 2 — เอเจนต์สร้างทั้งโปรเจกต์ (ต่อยอดภายหลัง):**
+- ต้องเพิ่ม 2 อย่างนอกเหนือจากโมเดล:
+  1. **Agent loop** — ระบบที่ให้โมเดลเรียกเครื่องมือจริง (write/read/run file, รันคำสั่ง) วนหลายรอบ
+  2. **ข้อมูล agentic** — tool-use traces (เหมือน dataset Fable-5 ของโมเดล `hotdogs/qwen3.6...` ที่คุณได้สิทธิ์ — ใช้เป็นแม่แบบรูปแบบข้อมูลได้)
+- แนะนำใช้ base ใหญ่ขึ้น (Qwen2.5-Coder-14B/32B) เมื่อถึงเฟสนี้ เพราะงานหลายไฟล์ต้องการความสามารถสูง
 
 ## 5. นำไปใช้ (เสียบเข้าระบบที่มีอยู่)
 1. Export: merge LoRA เป็นโมเดลเต็ม **หรือ** ทำ GGUF (สคริปต์รองรับทั้งสอง)

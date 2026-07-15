@@ -33,9 +33,16 @@ import argparse
 import json
 import os
 import sys
+import ssl
 import time
 import urllib.error
 import urllib.request
+
+try:
+    import certifi
+    _SSL_CTX = ssl.create_default_context(cafile=certifi.where())
+except Exception:  # noqa: BLE001
+    _SSL_CTX = ssl.create_default_context()
 
 SYSTEM = ("You are Rnai, the friendly AI assistant of Rnai.io. "
           "Always reply in the user's language. Be concise, warm, and accurate.")
@@ -49,7 +56,7 @@ def http_json(url, payload, headers=None, timeout=120, retries=3):
     for attempt in range(retries):
         try:
             req = urllib.request.Request(url, data=body, headers=hdr)
-            with urllib.request.urlopen(req, timeout=timeout) as resp:
+            with urllib.request.urlopen(req, timeout=timeout, context=_SSL_CTX) as resp:
                 return json.loads(resp.read().decode("utf-8")), None
         except urllib.error.HTTPError as e:
             msg = e.read().decode("utf-8", "ignore")[:200]
@@ -110,7 +117,14 @@ Return ONLY JSON:
     url = GEMINI_TMPL.format(model=judge_model, key=key)
     data, err = http_json(url, {
         "contents": [{"parts": [{"text": rubric}]}],
-        "generationConfig": {"temperature": 0.0, "responseMimeType": "application/json", "maxOutputTokens": 512},
+        "generationConfig": {
+            "temperature": 0.0,
+            "responseMimeType": "application/json",
+            "maxOutputTokens": 1024,
+            # gemini-2.5-flash is a thinking model; without this it spends the
+            # output budget on reasoning and returns no JSON. Disable thinking.
+            "thinkingConfig": {"thinkingBudget": 0},
+        },
     })
     if err:
         return None
@@ -186,7 +200,7 @@ def main():
         if compare:
             line += f"  win:{verdict.get('winner','-')}"
         print(line)
-        time.sleep(0.4)
+        time.sleep(1)
 
     def avg(xs):
         return round(sum(xs) / len(xs), 2) if xs else 0.0

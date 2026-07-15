@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="bg3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1B2C7A"/>
+      <stop offset="1" stop-color="#101B4D"/>
+    </linearGradient>
+    <linearGradient id="stalk" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#E8A020"/>
+      <stop offset="1" stop-color="#FFDD66"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1024" height="1024" rx="180" fill="url(#bg3)"/>
+
+  <!-- ring (แดงอาเซียน) -->
+  <circle cx="512" cy="512" r="396" fill="none" stroke="#E4443C" stroke-width="22"/>
+
+  <!-- rice stalks -->
+  <g stroke="url(#stalk)" stroke-width="30" stroke-linecap="round" fill="none">
+    <path d="M 512 780 C 512 650, 512 520, 512 410"/>
+    <path d="M 512 780 C 462 670, 424 560, 404 455"/>
+    <path d="M 512 780 C 562 670, 600 560, 620 455"/>
+    <path d="M 512 780 C 424 700, 348 622, 314 528"/>
+    <path d="M 512 780 C 600 700, 676 622, 710 528"/>
+  </g>
+
+  <!-- thin stems through each rice head -->
+  <g stroke="#F0B429" stroke-width="10" stroke-linecap="round" fill="none">
+    <path d="M 512 408 C 528 372, 550 340, 576 314"/>
+    <path d="M 404 450 C 390 420, 378 392, 370 364"/>
+    <path d="M 620 450 C 634 420, 646 392, 654 364"/>
+    <path d="M 314 524 C 304 496, 296 470, 293 458"/>
+    <path d="M 710 524 C 720 496, 728 470, 731 458"/>
+  </g>
+
+  <!-- rice heads: overlapping grains drooping from each tip -->
+  <g fill="#FFDD66">
+    <!-- center -->
+    <circle cx="512" cy="404" r="18"/><circle cx="524" cy="378" r="17"/><circle cx="538" cy="354" r="16"/><circle cx="554" cy="333" r="14"/><circle cx="572" cy="315" r="12"/>
+    <!-- inner left -->
+    <circle cx="404" cy="446" r="17"/><circle cx="390" cy="420" r="16"/><circle cx="379" cy="394" r="14"/><circle cx="371" cy="368" r="12"/>
+    <!-- inner right -->
+    <circle cx="620" cy="446" r="17"/><circle cx="634" cy="420" r="16"/><circle cx="645" cy="394" r="14"/><circle cx="653" cy="368" r="12"/>
+    <!-- outer left -->
+    <circle cx="312" cy="518" r="16"/><circle cx="302" cy="490" r="14"/><circle cx="295" cy="462" r="12"/>
+    <!-- outer right -->
+    <circle cx="712" cy="518" r="16"/><circle cx="722" cy="490" r="14"/><circle cx="729" cy="462" r="12"/>
+  </g>
+
+  <!-- binding tie -->
+  <g stroke="#FFF1B8" stroke-width="18" stroke-linecap="round" fill="none">
+    <path d="M 468 728 L 556 762"/>
+    <path d="M 468 762 L 556 728"/>
+  </g>
+</svg>

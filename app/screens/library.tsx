@@ -804,7 +804,7 @@ export default function LibraryScreen() {
                     <Text style={{ color: colors.text.primary, ...TYPOGRAPHY.headline, marginBottom: 2 }}>
                       {provider.label}
                     </Text>
-                    <Text style={{ color: colors.text.secondary, ...TYPOGRAPHY.caption, lineHeight: 16 }}>
+                    <Text style={{ color: colors.text.secondary, ...TYPOGRAPHY.caption, lineHeight: 19 }}>
                       {lang === 'th' ? provider.descTh : provider.desc}
                     </Text>
                   </View>

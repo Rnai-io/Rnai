@@ -159,7 +159,7 @@ export default function AuthScreen() {
             <View style={{
               borderRadius: 26,
               marginBottom: SPACING.lg,
-              shadowColor: '#34308C',
+              shadowColor: '#0B3945',
               shadowOffset: { width: 0, height: 10 },
               shadowOpacity: 0.35, shadowRadius: 20, elevation: 10,
             }}>

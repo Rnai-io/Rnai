@@ -112,7 +112,7 @@ export default function HomeScreen() {
           ══════════════════════════════════════════════ */}
           <ImageBackground
             source={{ uri: HERO_BG }}
-            style={{ width: '100%', height: 320 + insets.top }}
+            style={{ width: '100%', height: 348 + insets.top }}
             resizeMode="cover"
           >
             {/* Dark + colored overlay */}
@@ -123,10 +123,13 @@ export default function HomeScreen() {
               {/* Top bar */}
               <View style={{
                 flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-                paddingHorizontal: LAYOUT.screenPadding, paddingTop: SPACING.lg,
+                paddingHorizontal: LAYOUT.screenPadding, paddingTop: SPACING.xl,
               }}>
-                <View>
-                  <Text style={{ color: 'rgba(255,255,255,0.7)', ...TYPOGRAPHY.caption, fontWeight: '600' }}>
+                <View style={{ flex: 1, paddingRight: SPACING.md }}>
+                  <Text
+                    numberOfLines={1}
+                    style={{ color: 'rgba(255,255,255,0.7)', ...TYPOGRAPHY.caption, fontWeight: '600', lineHeight: 24 }}
+                  >
                     {greeting} 👋
                   </Text>
                   <Text style={{ color: '#FFFFFF', ...TYPOGRAPHY.headline, fontWeight: '700' }}>
@@ -162,10 +165,16 @@ export default function HomeScreen() {
                 }}>
                   {t.home.poweredBy}
                 </Text>
-                <Text style={{
-                  color: '#FFFFFF', fontSize: 34, fontWeight: '800', lineHeight: 40,
-                  marginBottom: SPACING.xl,
-                }}>
+                <Text
+                  numberOfLines={3}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.55}
+                  allowFontScaling={false}
+                  style={{
+                    color: '#FFFFFF', fontSize: 30, fontWeight: '800', lineHeight: 44,
+                    marginBottom: SPACING.lg,
+                  }}
+                >
                   {t.home.tagline}{'\n'}
                   <Text style={{ color: '#C084FC' }}>{t.home.taglineHighlight}</Text>
                 </Text>
@@ -189,7 +198,13 @@ export default function HomeScreen() {
                       }}
                     >
                       <Ionicons name="flash" size={18} color="#FFFFFF" />
-                      <Text style={{ color: '#FFFFFF', ...TYPOGRAPHY.callout, fontWeight: '700' }}>
+                      <Text
+                        numberOfLines={1}
+                        adjustsFontSizeToFit
+                        minimumFontScale={0.7}
+                        allowFontScaling={false}
+                        style={{ color: '#FFFFFF', ...TYPOGRAPHY.callout, fontWeight: '700', flexShrink: 1 }}
+                      >
                         {t.home.startCreating}
                       </Text>
                     </LinearGradient>
@@ -200,12 +215,19 @@ export default function HomeScreen() {
                     activeOpacity={0.8}
                     style={{
                       borderRadius: BORDER_RADIUS.full, paddingVertical: 14,
-                      paddingHorizontal: SPACING.xl,
+                      paddingHorizontal: SPACING.lg,
                       borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.45)',
                       alignItems: 'center', justifyContent: 'center',
+                      flexShrink: 1, maxWidth: '52%',
                     }}
                   >
-                    <Text style={{ color: '#FFFFFF', ...TYPOGRAPHY.callout, fontWeight: '600' }}>
+                    <Text
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.7}
+                      allowFontScaling={false}
+                      style={{ color: '#FFFFFF', ...TYPOGRAPHY.callout, fontWeight: '600' }}
+                    >
                       {t.home.generateBtn}
                     </Text>
                   </TouchableOpacity>
@@ -245,10 +267,16 @@ export default function HomeScreen() {
                 }}>
                   <Ionicons name={stat.icon as any} size={16} color={stat.color} />
                 </View>
-                <Text style={{ color: stat.color, fontSize: 16, fontWeight: '800', lineHeight: 20 }}>
+                <Text style={{ color: stat.color, fontSize: 16, fontWeight: '800', lineHeight: 24 }}>
                   {stat.value}
                 </Text>
-                <Text style={{ color: colors.text.secondary, ...TYPOGRAPHY.caption, textAlign: 'center', marginTop: 2 }}>
+                <Text
+                  numberOfLines={2}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.75}
+                  allowFontScaling={false}
+                  style={{ color: colors.text.secondary, ...TYPOGRAPHY.caption, textAlign: 'center', marginTop: 2 }}
+                >
                   {stat.label}
                 </Text>
               </View>
@@ -337,7 +365,7 @@ export default function HomeScreen() {
 
                     {/* Bottom: name + tagline */}
                     <View>
-                      <Text style={{ color: '#FFFFFF', fontSize: 15, fontWeight: '800', lineHeight: 19 }}>
+                      <Text style={{ color: '#FFFFFF', fontSize: 15, fontWeight: '800', lineHeight: 22 }}>
                         {skill.label}
                       </Text>
                       <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4, gap: 4 }}>

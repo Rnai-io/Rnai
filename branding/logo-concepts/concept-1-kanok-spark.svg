@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="bg1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3A35A0"/>
+      <stop offset="1" stop-color="#24215F"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#C97B12"/>
+      <stop offset="0.55" stop-color="#F0B429"/>
+      <stop offset="1" stop-color="#FFE18A"/>
+    </linearGradient>
+    <linearGradient id="gold2" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#E8A020"/>
+      <stop offset="1" stop-color="#FFF3C4"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1024" height="1024" rx="180" fill="url(#bg1)"/>
+
+  <!-- pedestal (บัวรองฐาน) -->
+  <path d="M 330 758 Q 512 850 694 758 Q 512 800 330 758 Z" fill="url(#gold)" opacity="0.9"/>
+
+  <!-- kanok tongue 1 (left, short) -->
+  <path d="M 360 720
+           C 340 630, 360 545, 430 480
+           C 428 560, 450 650, 500 720 Z" fill="url(#gold)"/>
+
+  <!-- kanok tongue 2 (middle) -->
+  <path d="M 505 720
+           C 470 600, 495 470, 585 380
+           C 560 500, 575 620, 630 715 Z" fill="url(#gold)"/>
+
+  <!-- kanok tongue 3 (tall, flicked tip) -->
+  <path d="M 635 710
+           C 600 560, 640 420, 700 350
+           C 720 320, 715 270, 680 240
+           C 738 275, 750 365, 718 465
+           C 696 560, 682 640, 686 705 Z" fill="url(#gold2)"/>
+
+  <!-- AI spark (ประกายเพชร) -->
+  <path d="M 752 138 L 768 176 L 806 192 L 768 208 L 752 246 L 736 208 L 698 192 L 736 176 Z" fill="#FFE9A8"/>
+  <circle cx="672" cy="130" r="9" fill="#FFE9A8" opacity="0.85"/>
+</svg>

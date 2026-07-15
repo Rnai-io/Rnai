@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rnai LLM — รายงานการสร้างและประโยชน์ (ไทย/อาเซียน)</title>
+<style>
+  :root{
+    --bg:#070708;--surface:#111114;--surface2:#17171c;--line:rgba(255,255,255,.09);
+    --txt:#f4f4f6;--muted:#a1a1aa;--dim:#71717a;--brand:#D77757;--brand2:#8a4b35;
+    --green:#10b981;--blue:#0EA5E9;--purple:#9333EA;--amber:#F59E0B;--teal:#14B8A6;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+       line-height:1.75;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:960px;margin:0 auto;padding:44px 22px 90px}
+  a{color:var(--brand)}
+  h1,h2,h3{line-height:1.3;font-weight:700}
+  code{background:rgba(255,255,255,.07);padding:1px 6px;border-radius:6px;font-size:.86em;
+       font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  /* cover */
+  .hero{display:flex;align-items:center;gap:16px;margin-bottom:8px}
+  .logo{width:54px;height:54px;border-radius:15px;background:linear-gradient(135deg,var(--brand),var(--brand2));
+        display:flex;align-items:center;justify-content:center;font-weight:900;font-size:24px;color:#fff;
+        box-shadow:0 8px 28px -6px rgba(215,119,87,.55)}
+  h1{font-size:32px;margin:0}.brand{color:var(--brand)}
+  .sub{color:var(--muted);margin:4px 0 22px;font-size:15px}
+  .pills{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:30px}
+  .pill{font-size:12.5px;font-weight:600;padding:6px 12px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+  .pill.ok{background:rgba(16,185,129,.12);color:#34d399;border-color:rgba(16,185,129,.3)}
+  .pill.b{background:rgba(215,119,87,.12);color:var(--brand);border-color:rgba(215,119,87,.3)}
+  /* toc */
+  .toc{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-bottom:30px}
+  .toc h3{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--dim)}
+  .toc ol{margin:0;padding-left:20px;color:var(--muted);font-size:14px;columns:2;column-gap:28px}
+  .toc a{color:#d4d4d8;text-decoration:none}.toc a:hover{color:var(--brand)}
+  /* sections */
+  section{margin:0 0 34px;scroll-margin-top:20px}
+  section>h2{font-size:22px;margin:0 0 4px;display:flex;align-items:center;gap:10px;border-bottom:2px solid var(--line);padding-bottom:10px}
+  .num{color:var(--brand);font-size:16px;font-weight:800}
+  .lead{color:var(--muted);font-size:15px;margin:10px 0 16px}
+  p{font-size:15px;color:#d4d4d8}
+  ul{margin:10px 0;padding-left:0;list-style:none}
+  li{position:relative;padding:5px 0 5px 24px;color:#d4d4d8;font-size:14.5px}
+  li::before{content:"";position:absolute;left:5px;top:13px;width:7px;height:7px;border-radius:50%;background:var(--brand)}
+  li b{color:var(--txt)}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:8px 0}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:8px 0}
+  @media(max-width:680px){.grid,.grid3{grid-template-columns:1fr}.toc ol{columns:1}h1{font-size:25px}}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+  .card.accent{border-color:rgba(215,119,87,.4)}
+  .card h3{font-size:15px;margin:0 0 8px;color:var(--txt);display:flex;align-items:center;gap:8px}
+  .card p,.card li{font-size:13.5px}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:6px 0 26px}
+  @media(max-width:680px){.kpis{grid-template-columns:repeat(2,1fr)}}
+  .kpi{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;text-align:center}
+  .kpi .v{font-size:23px;font-weight:800;color:var(--brand)}
+  .kpi .l{font-size:11.5px;color:var(--muted);margin-top:2px}
+  table{width:100%;border-collapse:collapse;margin:8px 0;font-size:13.5px}
+  th,td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--dim);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+  .arch{display:flex;flex-direction:column;gap:9px;margin:10px 0}
+  .layer{display:flex;align-items:center;gap:12px;background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+  .layer .n{flex:none;width:26px;height:26px;border-radius:8px;background:rgba(215,119,87,.18);color:var(--brand);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center}
+  .layer .t{font-size:13.5px}.layer .t b{color:var(--txt)}
+  .arrow{text-align:center;color:var(--dim);font-size:12px;margin:-3px 0}
+  .quote{background:rgba(16,185,129,.07);border-left:3px solid var(--green);border-radius:0 10px 10px 0;padding:12px 16px;margin:14px 0;font-size:14px;color:#bbf7d0}
+  .note{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:12px;padding:12px 16px;font-size:13.5px;color:#fcd9a3;margin:14px 0}
+  footer{color:var(--dim);font-size:12.5px;text-align:center;margin-top:40px;border-top:1px solid var(--line);padding-top:22px}
+  .benefit{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+  .benefit .ic{font-size:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="logo">R</div>
+    <div><h1>Rnai<span class="brand">.io</span> — รายงานการสร้าง AI โมเดล</h1></div>
+  </div>
+  <p class="sub">การสร้าง "Rnai LLM" โมเดลภาษาแบรนด์ของตัวเอง · ระบบ Mobile + Web-Backend + AI · ประโยชน์สำหรับไทยและอาเซียน · 23 มิถุนายน 2026</p>
+
+  <div class="pills">
+    <span class="pill ok">● Rnai LLM ใช้งานจริงบนคลาวด์</span>
+    <span class="pill b">Qwen2.5-7B + LoRA</span>
+    <span class="pill b">15 ภาษา</span>
+    <span class="pill b">ไทย/อาเซียน</span>
+    <span class="pill b">Self-hosted</span>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="v">3,022</div><div class="l">ตัวอย่างเทรน (คุณภาพ 100%)</div></div>
+    <div class="kpi"><div class="v">9</div><div class="l">ภาษา (ไทย+อาเซียน+สากล)</div></div>
+    <div class="kpi"><div class="v">7B</div><div class="l">พารามิเตอร์ (QLoRA 4-bit)</div></div>
+    <div class="kpi"><div class="v">~฿50</div><div class="l">ต้นทุนเทรน/รอบ (หรือฟรี)</div></div>
+  </div>
+
+  <div class="toc">
+    <h3>สารบัญ</h3>
+    <ol>
+      <li><a href="#exec">บทสรุปผู้บริหาร</a></li>
+      <li><a href="#system">ภาพรวมระบบทั้งหมด</a></li>
+      <li><a href="#mobile">Mobile App</a></li>
+      <li><a href="#backend">Web-Backend</a></li>
+      <li><a href="#model">การสร้าง Rnai LLM (AI Model)</a></li>
+      <li><a href="#resilience">ความทนทาน 3 ชั้น</a></li>
+      <li><a href="#asean">ประโยชน์ต่อไทย-อาเซียน</a></li>
+      <li><a href="#realworld">ประโยชน์จากการใช้งานจริง</a></li>
+      <li><a href="#status">สถานะปัจจุบัน &amp; ต่อยอด</a></li>
+      <li><a href="#spec">ข้อมูลทางเทคนิค</a></li>
+    </ol>
+  </div>
+
+  <section id="exec">
+    <h2><span class="num">1</span> บทสรุปผู้บริหาร</h2>
+    <p>Rnai.io ได้พัฒนาแพลตฟอร์ม AI ครบวงจรประกอบด้วย <b>แอปมือถือ</b> (iOS/Android), <b>ระบบหลังบ้านบนเว็บ</b> (API gateway), และก้าวสำคัญคือการ <b>สร้างโมเดลภาษา AI ของตัวเอง ("Rnai LLM")</b> ที่เชี่ยวชาญภาษาไทยและอาเซียน พร้อมความสามารถด้านการเขียนโค้ด/สร้างเว็บ</p>
+    <p>โมเดลนี้ถูกฝึก (fine-tune) จากโมเดลเปิด Qwen2.5-7B ด้วยเทคนิค QLoRA บนชุดข้อมูล 3,022 ตัวอย่างที่สร้างและคัดกรองคุณภาพเอง แล้วนำไป deploy บนคลาวด์ให้ทำงานเป็น <b>ระบบสำรองอัตโนมัติ</b> เมื่อผู้ให้บริการ AI ต่างชาติขัดข้อง — ทำให้บริการไม่สะดุดและลดการพึ่งพา vendor ภายนอก</p>
+    <div class="quote">ผลทดสอบจริง: เมื่อถามว่า "คุณคือใคร" โมเดลตอบว่า <b>"ฉันคือ Rnai... ผู้ช่วย AI ที่ถูกสร้างขึ้นเพื่อสนับสนุนผู้ใช้งานในแพลตฟอร์ม Rnai.io"</b> เป็นภาษาไทยถูกต้อง — ยืนยันว่าโมเดลเรียนรู้บุคลิกแบรนด์และภาษาไทยสำเร็จ</div>
+  </section>
+
+  <section id="system">
+    <h2><span class="num">2</span> ภาพรวมระบบทั้งหมด</h2>
+    <p class="lead">3 ส่วนหลักทำงานร่วมกัน — แอปคือหน้าบ้าน, backend คือสมองกลาง, AI model คือเครื่องยนต์</p>
+    <div class="grid3">
+      <div class="card"><h3>📱 Mobile App</h3><p>แอป Expo (iOS/Android) v2.0 — 15 ภาษา, 18 สกิล AI, หน้านโยบายในแอป, ระบบ failover ในตัว</p></div>
+      <div class="card"><h3>🖥️ Web-Backend</h3><p>Next.js บน Vercel — API gateway รวมผู้ให้บริการ AI หลายเจ้า + คิดเครดิต + ระบบสำรอง + หน้าเว็บ</p></div>
+      <div class="card accent"><h3>🧠 Rnai LLM</h3><p>โมเดลภาษาแบรนด์เอง — เทรนบนภาษาไทย/อาเซียน + โค้ด, เสิร์ฟบนคลาวด์เป็นตัวสำรอง</p></div>
+    </div>
+  </section>
+
+  <section id="mobile">
+    <h2><span class="num">3</span> Mobile App (rnai-mobile)</h2>
+    <p class="lead">แอปสร้างสรรค์ผลงานด้วย AI สำหรับผู้ใช้ทั่วไป — เวอร์ชัน 2.0.0</p>
+    <ul>
+      <li><b>15 ภาษา</b> — ไทย, อังกฤษ + อาเซียนครบ (อินโดนีเซีย, มาเลย์, เวียดนาม, ฟิลิปปินส์, เขมร, ลาว, พม่า) + ญี่ปุ่น/จีน/เกาหลี/ฝรั่งเศส/เยอรมัน/สเปน · จำภาษาที่เลือกข้ามการใช้งาน</li>
+      <li><b>18 สกิล AI</b> — สร้าง/แก้/ขยาย/ลบพื้นหลังรูป, สร้าง/สรุป/แปล/เขียนใหม่ข้อความ, สร้างเว็บไซต์, แปลงเสียง (TTS), <b>ถอดเสียงเป็นข้อความ (STT) แบบอัดเสียงจริง</b>, สกัดข้อมูลเป็น JSON, สร้างโค้ด ฯลฯ</li>
+      <li><b>นโยบาย/ข้อกำหนดในแอป</b> — แสดงครบทุกภาษา ฉบับทางการไทย/อังกฤษ</li>
+      <li><b>Failover ระดับแอป</b> — สลับไป backend สำรองอัตโนมัติเมื่อตัวหลักล่ม</li>
+      <li><b>การ์ดโมเดล AI โปร่งใส</b> — แสดงสถานะตามจริง (คลาวด์/Ollama) ไม่มีปุ่มหลอก</li>
+    </ul>
+  </section>
+
+  <section id="backend">
+    <h2><span class="num">4</span> Web-Backend (rnai-platform)</h2>
+    <p class="lead">Next.js บน Vercel (region สิงคโปร์) — deploy production แล้วที่ <code>rnai-io.vercel.app</code></p>
+    <ul>
+      <li><b>API Gateway รวมผู้ให้บริการ</b> — OpenRouter, Together AI, Google Gemini, Hugging Face ผ่านสคีมาเดียว</li>
+      <li><b>ระบบ failover หลายผู้ให้บริการ</b> — provider หนึ่งล่ม สลับอีกตัวอัตโนมัติ ครอบคลุม 13 สกิล</li>
+      <li><b>เชื่อม Rnai LLM เป็นตัวสำรองชั้นสุดท้าย</b> — provider ต่างชาติล่มหมด → ใช้โมเดลตัวเอง</li>
+      <li><b>หน้าสถานะ</b> <code>/api/v1/status</code> — รายงานสุขภาพระบบแบบเรียลไทม์ (ผล: operational)</li>
+      <li><b>ระบบเครดิต/ชำระเงิน</b> — Stripe + TrueMoney, จัดอันดับรางวัล, Firebase Auth</li>
+      <li><b>เว็บ UI ปรับใหม่</b> — navbar responsive, การ์ดตัวอย่างแบบโปสเตอร์, โทนแบรนด์</li>
+    </ul>
+  </section>
+
+  <section id="model">
+    <h2><span class="num">5</span> การสร้าง Rnai LLM (หัวใจของรายงาน)</h2>
+    <p class="lead">โมเดลภาษา AI แบรนด์ Rnai — ฝึกจากโมเดลเปิด ไม่ได้สร้างจากศูนย์ (ซึ่งต้นทุนหลักล้านดอลลาร์) แต่ใช้ fine-tune ที่คุ้มและทำได้จริง</p>
+
+    <h3 style="color:var(--brand);font-size:16px;margin-top:18px">ขั้นตอนการสร้าง (end-to-end)</h3>
+    <div class="arch">
+      <div class="layer"><span class="n">1</span><span class="t"><b>สร้างชุดข้อมูล</b> — เขียน seed คุณภาพสูง แล้วขยายอัตโนมัติด้วย Gemini (กรองซ้ำ/ตรวจคุณภาพ) → 3,022 ตัวอย่าง</span></div>
+      <div class="arrow">↓</div>
+      <div class="layer"><span class="n">2</span><span class="t"><b>ตรวจคุณภาพ</b> — สคริปต์ตรวจสอบ: 0 ซ้ำ, 0 เสีย, code-block 48%, health 100%</span></div>
+      <div class="arrow">↓</div>
+      <div class="layer"><span class="n">3</span><span class="t"><b>เทรน QLoRA</b> — บน Google Colab (GPU T4 ฟรี) ฝึก LoRA r=16 บน Qwen2.5-7B</span></div>
+      <div class="arrow">↓</div>
+      <div class="layer"><span class="n">4</span><span class="t"><b>เผยแพร่ + เสิร์ฟ</b> — push ขึ้น Hugging Face (<code>naiguitarfolk/rnai-llm</code>) → เสิร์ฟด้วย vLLM+LoRA บน Modal</span></div>
+      <div class="arrow">↓</div>
+      <div class="layer"><span class="n">5</span><span class="t"><b>ใช้งานจริง</b> — backend เรียกเป็นตัวสำรองของสกิลข้อความ/โค้ดอัตโนมัติ</span></div>
+    </div>
+
+    <div class="grid">
+      <div class="card"><h3>📊 ชุดข้อมูล</h3>
+        <ul><li>3,022 ตัวอย่าง (ครึ่งทั่วไป + ครึ่งโค้ด)</li><li>9 ภาษา กระจายทั่วอาเซียน</li><li>บุคลิกแบรนด์ + การปฏิเสธอย่างสุภาพ</li><li>คัดกรองคุณภาพอัตโนมัติ 100%</li></ul>
+      </div>
+      <div class="card"><h3>⚙️ การฝึก</h3>
+        <ul><li>Base: Qwen2.5-7B-Instruct (license เปิด)</li><li>เทคนิค: QLoRA 4-bit (ประหยัด VRAM)</li><li>ฮาร์ดแวร์: GPU T4 ฟรีบน Colab</li><li>ต้นทุน: ฟรี–หลักสิบบาท/รอบ</li></ul>
+      </div>
+      <div class="card"><h3>🚀 การเสิร์ฟ</h3>
+        <ul><li>adapter (161MB) บน Hugging Face</li><li>vLLM + LoRA บน Modal (scale-to-zero)</li><li>OpenAI-compatible API</li><li>ยืนยัน: <code>/v1/models</code> เห็น rnai-base + rnai-llm</li></ul>
+      </div>
+      <div class="card"><h3>✅ ผลลัพธ์</h3>
+        <ul><li>รู้จักตัวเองว่าเป็นผู้ช่วยของ Rnai.io</li><li>ตอบภาษาไทย/อาเซียนได้</li><li>เขียนโค้ด/สร้างเว็บได้ (builder track)</li><li>idle = ไม่เสียเงิน (scale-to-zero)</li></ul>
+      </div>
+    </div>
+    <div class="note">⚠️ หมายเหตุ: เวอร์ชันปัจจุบันฝึก 1 epoch — บุคลิกและภาษาดีแล้ว ความรู้เชิงลึกยังไม่เท่าโมเดลใหญ่ระดับโลก เหมาะเป็นผู้ช่วย/ตัวสำรอง และพัฒนาต่อได้ด้วยข้อมูลและรอบฝึกที่มากขึ้น</div>
+  </section>
+
+  <section id="resilience">
+    <h2><span class="num">6</span> ความทนทาน 3 ชั้น (ทำไมบริการไม่ล่ม)</h2>
+    <div class="arch">
+      <div class="layer"><span class="n">1</span><span class="t"><b>แอป</b> — backend หลักล่ม → สลับไป backend สำรอง</span></div>
+      <div class="arrow">↓</div>
+      <div class="layer"><span class="n">2</span><span class="t"><b>Backend</b> — provider ต่างชาติล่ม → สลับ provider อื่น (circuit breaker)</span></div>
+      <div class="arrow">↓</div>
+      <div class="layer"><span class="n">3</span><span class="t"><b>Rnai LLM (self-hosted)</b> — provider ต่างชาติล่มหมด → โมเดลตัวเองรับช่วงต่อ ไม่พึ่งใคร</span></div>
+    </div>
+    <p>ชั้นที่ 3 นี้คือคุณค่าหลักของการมีโมเดลของตัวเอง — แม้บริการ AI ระดับโลกล่มพร้อมกัน ระบบของ Rnai ก็ยังให้บริการผู้ใช้ได้ต่อเนื่อง</p>
+  </section>
+
+  <section id="asean">
+    <h2><span class="num">7</span> ประโยชน์ต่อไทยและอาเซียน</h2>
+    <p class="lead">เหตุผลเชิงยุทธศาสตร์ว่าทำไมโมเดลแบรนด์ไทยที่เน้นอาเซียนจึงสำคัญ</p>
+    <div class="grid">
+      <div class="benefit"><div class="ic">🌏</div><h3>เข้าถึงตลาด 600+ ล้านคน</h3><p>รองรับภาษาอาเซียนครบ (ไทย/อินโด/มาเลย์/เวียดนาม/ฟิลิปปินส์/เขมร/ลาว/พม่า) — ตลาดที่โมเดลตะวันตกมักทำได้ไม่ดี เปิดโอกาสขยายสู่ภูมิภาค</p></div>
+      <div class="benefit"><div class="ic">🇹🇭</div><h3>เก่งภาษาไทย/อาเซียนกว่า</h3><p>ฝึกบนข้อมูลภาษาท้องถิ่นโดยตรง → เข้าใจบริบท สำนวน และวัฒนธรรมได้ดีกว่าโมเดลสากลที่เน้นภาษาอังกฤษ</p></div>
+      <div class="benefit"><div class="ic">🔐</div><h3>อธิปไตยทางข้อมูล (Data Sovereignty)</h3><p>โมเดลของตัวเอง host เองได้ → ข้อมูลผู้ใช้ไม่ต้องส่งออกนอกประเทศ สอดคล้องกับ PDPA และลดความเสี่ยงด้านความเป็นส่วนตัว</p></div>
+      <div class="benefit"><div class="ic">⛓️</div><h3>ไม่ผูกขาดกับ vendor ต่างชาติ</h3><p>ลดการพึ่งพา OpenAI/Google เพียงเจ้าเดียว — ควบคุมต้นทุน ราคา และความพร้อมใช้งานได้เอง ไม่ถูกล็อกอิน</p></div>
+      <div class="benefit"><div class="ic">💸</div><h3>ต้นทุนต่ำ ยั่งยืน</h3><p>เทรนหลักสิบบาท/รอบ, เสิร์ฟแบบ scale-to-zero (ไม่ใช้=ไม่จ่าย) → ต้นทุนต่อหน่วยถูกลงเมื่อสเกล เทียบกับค่า API รายครั้งของเจ้าใหญ่</p></div>
+      <div class="benefit"><div class="ic">🛡️</div><h3>บริการไม่สะดุด</h3><p>ทำงานเป็นชั้นสำรอง — แม้บริการ AI ระดับโลกล่ม ผู้ใช้ไทย/อาเซียนยังใช้งานต่อได้ เพิ่มความน่าเชื่อถือของบริการ</p></div>
+    </div>
+  </section>
+
+  <section id="realworld">
+    <h2><span class="num">8</span> ประโยชน์จากการใช้งานจริง</h2>
+    <div class="grid3">
+      <div class="card"><h3>👤 ต่อผู้ใช้</h3><ul><li>ใช้งานด้วยภาษาแม่ของตัวเอง</li><li>คำตอบเข้าบริบทท้องถิ่น</li><li>บริการเสถียร ไม่ล่ม</li><li>ครบในแอปเดียว (รูป/ข้อความ/เสียง/โค้ด)</li></ul></div>
+      <div class="card"><h3>🏢 ต่อธุรกิจ</h3><ul><li>ลดค่า API ต่างชาติระยะยาว</li><li>ควบคุมคุณภาพ + โทนแบรนด์เอง</li><li>ขยายตลาดสู่อาเซียนได้ทันที</li><li>เป็นเจ้าของเทคโนโลยีหลัก</li></ul></div>
+      <div class="card"><h3>⚙️ ต่อระบบ</h3><ul><li>ทนทาน (failover 3 ชั้น)</li><li>ปรับแต่งโมเดลเองได้ตามงาน</li><li>scale-to-zero ประหยัด</li><li>ต่อยอดเป็นเอเจนต์สร้างซอฟต์แวร์ได้</li></ul></div>
+    </div>
+    <p style="margin-top:14px">โดยรวม การมี Rnai LLM เปลี่ยนสถานะจาก "ผู้เช่าใช้ AI ของคนอื่น" เป็น <b>"เจ้าของโมเดล AI ของตัวเอง"</b> ที่ปรับแต่ง ควบคุมต้นทุน และเจาะตลาดภาษาท้องถิ่นได้ — ข้อได้เปรียบเชิงแข่งขันที่ยั่งยืน</p>
+  </section>
+
+  <section id="status">
+    <h2><span class="num">9</span> สถานะปัจจุบัน &amp; การต่อยอด</h2>
+    <table>
+      <tr><th>รายการ</th><th>สถานะ</th></tr>
+      <tr><td>Backend v2.0 → Vercel production</td><td style="color:#34d399">✅ ใช้งานจริง</td></tr>
+      <tr><td>ระบบสำรอง self-hosted (Modal: LLM/รูป/STT/TTS)</td><td style="color:#34d399">✅ ใช้งานจริง</td></tr>
+      <tr><td>Rnai LLM — เทรน + เสิร์ฟ + ทดสอบผ่าน</td><td style="color:#34d399">✅ ใช้งานจริง</td></tr>
+      <tr><td>แอปมือถือ v2.0 (build/EAS)</td><td style="color:#F59E0B">⏳ build บนเครื่อง</td></tr>
+      <tr><td>push โค้ดขึ้น GitHub</td><td style="color:#F59E0B">⏳ รอดำเนินการ</td></tr>
+    </table>
+    <h3 style="color:var(--brand);font-size:16px;margin-top:16px">แผนต่อยอด</h3>
+    <ul>
+      <li><b>เฟส 2 ของ Rnai LLM</b> — ฝึก 3 epochs + เพิ่มข้อมูล เพื่อยกคุณภาพ; เพิ่มความสามารถเอเจนต์สร้างทั้งโปรเจกต์ (multi-file + tool use)</li>
+      <li><b>ขยับเป็น provider หลัก</b> ของบางสกิล (เช่นสร้างโค้ด) เมื่อมั่นใจคุณภาพ</li>
+      <li><b>โมเดลใหญ่ขึ้น</b> (14B/32B) สำหรับงานซับซ้อน เมื่อมีผู้ใช้มากพอ</li>
+    </ul>
+  </section>
+
+  <section id="spec">
+    <h2><span class="num">10</span> ข้อมูลทางเทคนิค (สรุป)</h2>
+    <table>
+      <tr><th>หัวข้อ</th><th>รายละเอียด</th></tr>
+      <tr><td>โมเดลฐาน</td><td>Qwen/Qwen2.5-7B-Instruct (Apache-2.0)</td></tr>
+      <tr><td>วิธีฝึก</td><td>QLoRA 4-bit · LoRA r=16, alpha=16 · Unsloth</td></tr>
+      <tr><td>ชุดข้อมูล</td><td>3,022 ตัวอย่าง · 9 ภาษา · 48% โค้ด</td></tr>
+      <tr><td>ฮาร์ดแวร์ฝึก</td><td>Google Colab — NVIDIA T4 (ฟรี)</td></tr>
+      <tr><td>adapter</td><td>naiguitarfolk/rnai-llm (HF) · 161MB</td></tr>
+      <tr><td>การเสิร์ฟ</td><td>vLLM + LoRA บน Modal (A10G, scale-to-zero) · OpenAI-compatible</td></tr>
+      <tr><td>backend</td><td>Next.js → Vercel · /api/v1/status · failover 13 สกิล</td></tr>
+      <tr><td>แอป</td><td>Expo (iOS/Android) v2.0.0 · 15 ภาษา · 18 สกิล</td></tr>
+    </table>
+  </section>
+
+  <footer>
+    Rnai.io · รายงานการสร้าง Rnai LLM และระบบ AI ครบวงจร · 23 มิถุนายน 2026<br>
+    Rnai LLM เทรน + deploy + ทดสอบผ่านจริง · Mobile + Backend + Self-hosted AI ทำงานร่วมกัน
+  </footer>
+
+</div>
+</body>
+</html>

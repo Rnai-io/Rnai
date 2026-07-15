@@ -34,10 +34,19 @@ import os
 import random
 import re
 import sys
+import ssl
 import time
 import urllib.error
 import urllib.request
 from difflib import SequenceMatcher
+
+# macOS Python often lacks a CA bundle → use certifi's if available (fixes
+# "CERTIFICATE_VERIFY_FAILED"). Falls back to the system default otherwise.
+try:
+    import certifi
+    _SSL_CTX = ssl.create_default_context(cafile=certifi.where())
+except Exception:  # noqa: BLE001
+    _SSL_CTX = ssl.create_default_context()
 
 SYSTEM = ("You are Rnai, the friendly AI assistant of Rnai.io. "
           "Always reply in the user's language. Be concise, warm, and accurate.")
@@ -58,6 +67,22 @@ TASKS = [
     "politely refusing an unsafe or disallowed request and offering a safe alternative",
     "a friendly customer-support style reply",
     "a step-by-step how-to for an everyday task",
+]
+
+# Builder/coder track — generate code-generation examples (Phase 1: one-shot).
+# The assistant returns complete, runnable code in fenced blocks + a short note,
+# replying in the user's language (instructions can be Thai/English).
+CODER_TASKS = [
+    "build a small responsive HTML landing page from a description",
+    "write a reusable React/TypeScript component",
+    "write a Python script for a everyday data task (csv/files/api)",
+    "create a REST API endpoint (Express or FastAPI)",
+    "find and fix a bug in a short code snippet",
+    "write a SQL query for a described result",
+    "style a UI with Tailwind CSS (responsive)",
+    "write a Dockerfile or simple CI/deploy config",
+    "write a small utility/validation function with example usage",
+    "explain then refactor a short snippet to be cleaner",
 ]
 
 API_TMPL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={key}"
@@ -100,7 +125,7 @@ def call_gemini(model, key, prompt, temperature=0.9, max_retries=3):
     for attempt in range(max_retries):
         try:
             req = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json"})
-            with urllib.request.urlopen(req, timeout=120) as resp:
+            with urllib.request.urlopen(req, timeout=120, context=_SSL_CTX) as resp:
                 data = json.loads(resp.read().decode("utf-8"))
             return data["candidates"][0]["content"]["parts"][0]["text"]
         except urllib.error.HTTPError as e:
@@ -195,15 +220,24 @@ def load_jsonl(path):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--seed", default="rnai_dataset.sample.jsonl")
-    ap.add_argument("--out", default="rnai_dataset.generated.jsonl")
-    ap.add_argument("--merged", default="rnai_dataset.train.jsonl")
+    ap.add_argument("--mode", choices=["general", "coder"], default="general",
+                    help="general = assistant/Thai-ASEAN; coder = code-generation (builder track)")
+    ap.add_argument("--seed", default=None)
+    ap.add_argument("--out", default=None)
+    ap.add_argument("--merged", default=None)
     ap.add_argument("--target", type=int, default=2000)
     ap.add_argument("--model", default=os.environ.get("GEMINI_MODEL", "gemini-2.5-flash"))
     ap.add_argument("--batch", type=int, default=8)
     ap.add_argument("--key", default=os.environ.get("GEMINI_API_KEY", ""))
     ap.add_argument("--sleep", type=float, default=0.5, help="pause between API calls (s)")
     args = ap.parse_args()
+
+    # Mode-aware defaults + task pool
+    tasks = CODER_TASKS if args.mode == "coder" else TASKS
+    base = "rnai_coder" if args.mode == "coder" else "rnai_dataset"
+    args.seed = args.seed or f"{base}.sample.jsonl"
+    args.out = args.out or f"{base}.generated.jsonl"
+    args.merged = args.merged or f"{base}.train.jsonl"
 
     if not args.key:
         sys.exit("Set GEMINI_API_KEY env var or pass --key")
@@ -230,7 +264,7 @@ def main():
 
     while len(kept) < args.target and calls < max_calls:
         language = random.choice(LANGUAGES)
-        task = random.choice(TASKS)
+        task = random.choice(tasks)
         prompt = build_prompt(seed, language, task, args.batch)
         text = call_gemini(args.model, args.key, prompt)
         calls += 1
@@ -269,7 +303,7 @@ def main():
     print(f"\n✅ generated {len(kept)} examples → {args.out}")
     print(f"   dropped: {dropped_dup} duplicates, {dropped_bad} invalid")
     print(f"   merged train set (seed + generated) → {args.merged}")
-    print("   Next: eyeball a sample, then  modal run modal_train.py --data " + args.merged)
+    print("   Next: eyeball a sample, then  RNAI_DATA=" + args.merged + " python3 -m modal run modal_train.py")
 
 
 if __name__ == "__main__":

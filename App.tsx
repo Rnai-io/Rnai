@@ -1,5 +1,5 @@
 import React from 'react';
-import { Platform, Dimensions, View, ActivityIndicator, Image } from 'react-native';
+import { Platform, Dimensions, View, ActivityIndicator, Image, Text, TouchableOpacity } from 'react-native';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -33,7 +33,7 @@ function TabNavigator() {
 
   // ── ไอคอนและตัวหนังสือ ──────────────────────────────────────
   const iconSize  = isSmall ? 20 : isLarge ? 23 : 22;
-  const labelSize = isSmall ? 9  : isLarge ? 11 : 10;
+  const labelSize = isSmall ? 9 : 10;
 
   // ── ความสูง tab bar รวม safe-area ──────────────────────────
   // iOS Home Indicator = insets.bottom (34px บน notch, 0 บน SE)
@@ -69,26 +69,53 @@ function TabNavigator() {
       id={undefined as any}
       screenOptions={{
         headerShown: false,
-        tabBarStyle,
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.text.tertiary,
         tabBarHideOnKeyboard: true,
-        tabBarLabelStyle: {
-          fontSize: labelSize,
-          fontWeight: isVibrant ? '700' : '500',
-          marginTop: 2,
-          letterSpacing: isSmall ? -0.2 : 0,
-        },
-        tabBarIconStyle: {
-          marginBottom: 0,
-        },
-        tabBarItemStyle: {
-          paddingVertical: 0,
-          // แบ่งพื้นที่เท่ากันแต่ละปุ่ม
-          flex: 1,
-          alignItems: 'center',
-          justifyContent: 'center',
-        },
+      }}
+      // แถบล่างแบบกำหนดเองทั้งหมด — คุม layout เอง ไม่ให้ react-navigation ตัด label
+      tabBar={({ state, descriptors, navigation }) => {
+        const activeName = state.routes[state.index]?.name;
+        if (activeName === 'Skill' || activeName === 'Legal') return null;
+        return (
+          <View style={[tabBarStyle as any, { flexDirection: 'row' }]}>
+            {state.routes.map((route, index) => {
+              const { options } = descriptors[route.key];
+              if (options.tabBarButton) return null; // ซ่อน Skill/Legal
+              const focused = state.index === index;
+              const color = focused ? colors.primary : colors.text.tertiary;
+              const label = (options.title ?? route.name) as string;
+              const onPress = () => {
+                const event = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
+                if (!focused && !event.defaultPrevented) navigation.navigate(route.name as never);
+              };
+              return (
+                <TouchableOpacity
+                  key={route.key}
+                  accessibilityRole="button"
+                  accessibilityState={focused ? { selected: true } : {}}
+                  onPress={onPress}
+                  activeOpacity={0.7}
+                  style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+                >
+                  {(options.tabBarIcon as any)?.({ focused, color, size: iconSize })}
+                  <Text
+                    numberOfLines={1}
+                    allowFontScaling={false}
+                    style={{
+                      color,
+                      fontSize: labelSize,
+                      fontWeight: isVibrant ? '700' : '500',
+                      marginTop: 3,
+                      textAlign: 'center',
+                      includeFontPadding: false,
+                    }}
+                  >
+                    {label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        );
       }}
     >
       <Tab.Screen

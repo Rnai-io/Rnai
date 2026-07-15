@@ -568,7 +568,7 @@ export default function SkillDetailScreen() {
         )
       ) : (
         <View style={styles.exampleTextBadge}>
-          <Text style={{ ...TYPOGRAPHY.caption, color: colors.text.secondary, fontStyle: 'italic', lineHeight: 18 }} numberOfLines={4}>
+          <Text style={{ ...TYPOGRAPHY.caption, color: colors.text.secondary, fontStyle: 'italic', lineHeight: 20 }} numberOfLines={4}>
             "{item.prompt.substring(0, 120)}{item.prompt.length > 120 ? '…' : ''}"
           </Text>
         </View>

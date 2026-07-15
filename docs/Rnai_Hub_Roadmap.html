@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rnai.io Hub — พิมพ์เขียวการอัปเกรด (ศูนย์กลาง App + AI + Downloads)</title>
+<style>
+  :root{
+    --bg:#070708;--surface:#111114;--surface2:#17171c;--line:rgba(255,255,255,.09);
+    --txt:#f4f4f6;--muted:#a1a1aa;--dim:#71717a;--brand:#D77757;--brand2:#8a4b35;
+    --green:#10b981;--blue:#0EA5E9;--purple:#9333EA;--amber:#F59E0B;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;line-height:1.75;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:960px;margin:0 auto;padding:44px 22px 90px}
+  a{color:var(--brand)} h1,h2,h3{line-height:1.3;font-weight:700}
+  code{background:rgba(255,255,255,.07);padding:1px 6px;border-radius:6px;font-size:.85em;font-family:ui-monospace,Menlo,monospace}
+  .hero{display:flex;align-items:center;gap:16px;margin-bottom:8px}
+  .logo{width:54px;height:54px;border-radius:15px;background:linear-gradient(135deg,var(--brand),var(--brand2));display:flex;align-items:center;justify-content:center;font-weight:900;font-size:24px;color:#fff;box-shadow:0 8px 28px -6px rgba(215,119,87,.55)}
+  h1{font-size:30px;margin:0}.brand{color:var(--brand)}
+  .sub{color:var(--muted);margin:4px 0 22px;font-size:15px}
+  .pills{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:28px}
+  .pill{font-size:12.5px;font-weight:600;padding:6px 12px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+  .pill.b{background:rgba(215,119,87,.12);color:var(--brand);border-color:rgba(215,119,87,.3)}
+  section{margin:0 0 34px;scroll-margin-top:20px}
+  section>h2{font-size:21px;margin:0 0 6px;display:flex;align-items:center;gap:10px;border-bottom:2px solid var(--line);padding-bottom:10px}
+  .num{color:var(--brand);font-weight:800}
+  .lead{color:var(--muted);font-size:15px;margin:10px 0 14px}
+  p{font-size:15px;color:#d4d4d8}
+  ul{margin:8px 0;padding-left:0;list-style:none}
+  li{position:relative;padding:5px 0 5px 24px;color:#d4d4d8;font-size:14.5px}
+  li::before{content:"";position:absolute;left:5px;top:13px;width:7px;height:7px;border-radius:50%;background:var(--brand)}
+  li b{color:var(--txt)}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:8px 0}
+  @media(max-width:680px){.grid{grid-template-columns:1fr}h1{font-size:24px}}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+  .card.accent{border-color:rgba(215,119,87,.4)}
+  .card h3{font-size:15px;margin:0 0 8px;color:var(--txt)}
+  .card p,.card li{font-size:13.5px}
+  .phase{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:4px 22px 18px;margin:14px 0}
+  .ptag{display:inline-block;margin:16px 0 0;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--brand);background:rgba(215,119,87,.12);padding:4px 10px;border-radius:999px}
+  .flow{display:flex;flex-direction:column;gap:9px;margin:12px 0}
+  .step{display:flex;align-items:center;gap:12px;background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:11px 14px}
+  .step .n{flex:none;width:24px;height:24px;border-radius:7px;background:rgba(215,119,87,.18);color:var(--brand);font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center}
+  .step .t{font-size:13.5px}.step .t b{color:var(--txt)}
+  .arrow{text-align:center;color:var(--dim);font-size:12px;margin:-3px 0}
+  table{width:100%;border-collapse:collapse;margin:8px 0;font-size:13.5px}
+  th,td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--dim);font-weight:600;font-size:12px;text-transform:uppercase}
+  .ok{color:#34d399}.new{color:var(--amber)}
+  .note{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:12px;padding:12px 16px;font-size:13.5px;color:#fcd9a3;margin:14px 0}
+  .okbox{background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.25);border-radius:12px;padding:12px 16px;font-size:13.5px;color:#86efac;margin:14px 0}
+  footer{color:var(--dim);font-size:12.5px;text-align:center;margin-top:40px;border-top:1px solid var(--line);padding-top:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="logo">R</div>
+    <div><h1>Rnai<span class="brand">.io</span> Hub — พิมพ์เขียวการอัปเกรด</h1></div>
+  </div>
+  <p class="sub">เปลี่ยนเว็บให้เป็น "ศูนย์กลาง" ของทุก App ที่คุณสร้าง · ดาวน์โหลดสำหรับสมาชิกจ่ายเงิน · ผู้ช่วย AI ที่รู้จักโปรเจคคุณ · 24 มิ.ย. 2026</p>
+
+  <div class="pills">
+    <span class="pill b">ศูนย์กลาง App</span>
+    <span class="pill b">Downloads (paid-gated)</span>
+    <span class="pill b">RAG · AI รู้จักโปรเจค</span>
+    <span class="pill b">UI โปรขึ้น</span>
+  </div>
+
+  <section id="vision">
+    <h2><span class="num">วิสัยทัศน์</span></h2>
+    <p>ทำให้ <code>rnai-io.vercel.app</code> เป็น <b>"บ้าน" ของทุกผลงาน</b> — ผู้ใช้สมัครสมาชิก (จ่ายเงิน) แล้ว <b>ดาวน์โหลด App/ซอฟต์แวร์ที่คุณสร้างเสร็จได้</b>, มี <b>ผู้ช่วย AI (Rnai LLM) ที่ศึกษาโปรเจคคุณ</b> ช่วยตอบ/แนะนำการใช้งาน, และหน้าเว็บ <b>สวย-โปร</b> เป็นหน้าตาแบรนด์</p>
+    <div class="okbox">✅ ของที่มีอยู่แล้ว นำมาใช้ต่อได้เลย: Firebase Auth · Stripe + TrueMoney + แพ็กเกจ (free/pro/enterprise) · Upstash (Redis + Vector) · Rnai LLM (deploy แล้ว) · ระบบ failover · เว็บ Next.js บน Vercel</div>
+  </section>
+
+  <section id="arch">
+    <h2><span class="num">สถาปัตยกรรม</span> ภาพรวม Hub</h2>
+    <div class="flow">
+      <div class="step"><span class="n">①</span><span class="t"><b>หน้าเว็บ (Hub)</b> — Landing · Products/Downloads · AI Assistant · Docs · Account</span></div>
+      <div class="step"><span class="n">②</span><span class="t"><b>สมาชิก + สิทธิ์</b> — Firebase Auth + แพ็กเกจ (Stripe/TrueMoney) → ตัดสินว่าใครโหลดอะไรได้</span></div>
+      <div class="step"><span class="n">③</span><span class="t"><b>คลังไฟล์</b> — GitHub Releases (เก็บ APK/IPA/zip) + backend gate สิทธิ์ก่อนปล่อยลิงก์</span></div>
+      <div class="step"><span class="n">④</span><span class="t"><b>ผู้ช่วย AI</b> — Rnai LLM + RAG (Upstash Vector) ที่ดึงความรู้จากโค้ด/เอกสารโปรเจคคุณมาตอบ</span></div>
+    </div>
+  </section>
+
+  <div class="phase">
+    <span class="ptag">เฟส 1 · เริ่มก่อน (คุ้มสุด)</span>
+    <h2 style="border:0;font-size:19px;margin:10px 0 0">📦 หน้า Downloads สำหรับสมาชิกจ่ายเงิน (GitHub Releases)</h2>
+    <p class="lead">ให้สมาชิกที่จ่ายแล้วโหลด App/ซอฟต์แวร์ของคุณ — เก็บไฟล์ใน GitHub Releases (ฟรี)</p>
+    <div class="flow">
+      <div class="step"><span class="n">1</span><span class="t"><b>เก็บไฟล์</b> — อัป APK/installer/zip ขึ้น GitHub Releases (repo private เพื่อกันโหลดตรง)</span></div>
+      <div class="arrow">↓</div>
+      <div class="step"><span class="n">2</span><span class="t"><b>Products data</b> — ลิสต์ผลงาน (ชื่อ/ไอคอน/เวอร์ชัน/แพลตฟอร์ม/แพ็กเกจที่ปลดล็อก/asset URL)</span></div>
+      <div class="arrow">↓</div>
+      <div class="step"><span class="n">3</span><span class="t"><b>หน้า /products</b> — โชว์ผลงาน · จ่ายแล้ว → ปุ่มดาวน์โหลด · ยังไม่จ่าย → ปุ่ม "อัปเกรด"</span></div>
+      <div class="arrow">↓</div>
+      <div class="step"><span class="n">4</span><span class="t"><b>Backend gate</b> — <code>GET /api/downloads/[id]</code> เช็คแพ็กเกจผู้ใช้ → ปล่อยไฟล์จาก GitHub (ผ่าน token) เฉพาะคนมีสิทธิ์</span></div>
+    </div>
+    <div class="note">⚠️ เรื่อง gating กับ GitHub Releases: ไฟล์ใน release ของ <b>public repo = ใครมีลิงก์ก็โหลดได้</b> → กันไม่จริง. ทำจริงต้อง <b>private repo</b> + backend ดึงไฟล์ด้วย GitHub token แล้วส่งต่อเฉพาะคนจ่าย (proxy/redirect). ไฟล์ใหญ่มาก (>หลายร้อย MB) อาจชน limit ของ Vercel function → ทางออก: ใช้ Cloud Storage + signed URL สำหรับไฟล์ใหญ่ ส่วน GitHub Releases เหมาะกับไฟล์ขนาดกลาง</div>
+    <p style="font-size:13.5px;color:var(--muted)"><b>ใช้ของเดิม:</b> Firebase Auth + billing (Stripe/TrueMoney) + แพ็กเกจ → แค่เพิ่มหน้า + route gate · <span class="new">ของใหม่:</span> products data, หน้า /products, /api/downloads</p>
+  </div>
+
+  <div class="phase">
+    <span class="ptag">เฟส 2 · ตัวสร้างความต่าง</span>
+    <h2 style="border:0;font-size:19px;margin:10px 0 0">🧠 RAG — ให้ Rnai LLM "รู้จัก" โปรเจคคุณ</h2>
+    <p class="lead">วิธีที่ถูกต้องสำหรับ "ความรู้เฉพาะโปรเจค" คือ RAG ไม่ใช่ fine-tune (แม่นกว่า อัปเดตง่ายกว่า ไม่หลอน)</p>
+    <div class="flow">
+      <div class="step"><span class="n">1</span><span class="t"><b>Ingest</b> — สคริปต์อ่าน repo/เอกสารโปรเจคที่ทำเสร็จ → ตัดเป็นชิ้น (chunk)</span></div>
+      <div class="arrow">↓</div>
+      <div class="step"><span class="n">2</span><span class="t"><b>Embed + เก็บ</b> — สร้าง embedding (Gemini <code>text-embedding-004</code> ใช้ key ที่มี) → เก็บใน <b>Upstash Vector</b></span></div>
+      <div class="arrow">↓</div>
+      <div class="step"><span class="n">3</span><span class="t"><b>ถาม-ตอบ</b> — ผู้ใช้ถาม → ค้น vector หาชิ้นที่เกี่ยว → ยัดเข้า context ของ Rnai LLM → ตอบโดยอ้างอิงโค้ด/เอกสารจริง</span></div>
+      <div class="arrow">↓</div>
+      <div class="step"><span class="n">4</span><span class="t"><b>อัปเดตง่าย</b> — มีโปรเจคใหม่/แก้โค้ด → รัน ingest ใหม่ ความรู้อัปเดตทันที (ไม่ต้องเทรนซ้ำ)</span></div>
+    </div>
+    <p style="font-size:13.5px;color:var(--muted)">ผลลัพธ์: ผู้ช่วยบนเว็บ/แอปตอบได้ว่า "App X ใช้ยังไง", "ฟังก์ชันนี้ทำอะไร", ช่วย user ที่โหลดซอฟต์แวร์ไปใช้ — เป็น "ฐานความรู้" จากผลงานคุณจริงๆ · <span class="new">ของใหม่:</span> สคริปต์ ingest, /api/assistant ที่ทำ RAG</p>
+    <div class="note">📌 fine-tune (ที่ทำไปแล้ว) = สอน "บุคลิก/สไตล์" · RAG = ใส่ "ความรู้ข้อเท็จจริง" — ใช้คู่กันได้ดีที่สุด</div>
+  </div>
+
+  <div class="phase">
+    <span class="ptag">เฟส 3 · หน้าตา</span>
+    <h2 style="border:0;font-size:19px;margin:10px 0 0">🎨 อัปเกรดเว็บให้สวย-โปร + เป็น Hub จริง</h2>
+    <ul>
+      <li><b>โครงเว็บใหม่:</b> Home (hero) → <b>Products</b> (showcase + ดาวน์โหลด) → <b>AI Assistant</b> (รู้จักโปรเจค) → Docs → Account/Billing</li>
+      <li><b>ต่อยอดดีไซน์:</b> navbar responsive + การ์ดโปสเตอร์ (ทำแล้ว) → เพิ่มการ์ดผลงาน, showcase, โทนแบรนด์สม่ำเสมอ, dark mode โปร</li>
+      <li><b>หน้า product:</b> ภาพ/วิดีโอ, ฟีเจอร์, ปุ่มดาวน์โหลด/อัปเกรด, รีวิว</li>
+    </ul>
+    <p style="font-size:13.5px;color:var(--muted)">ทำคู่ขนานกับเฟส 1-2 ได้ (งาน frontend แยกส่วน)</p>
+  </div>
+
+  <section id="seq">
+    <h2><span class="num">ลำดับแนะนำ</span> &amp; เหตุผล</h2>
+    <table>
+      <tr><th>ลำดับ</th><th>ทำอะไร</th><th>ทำไม</th></tr>
+      <tr><td>1</td><td>เฟส 1 — Downloads + gating</td><td>สร้างรายได้ทันที (สมาชิกจ่ายเงิน) + ใช้ของที่มีเกือบครบ</td></tr>
+      <tr><td>2</td><td>เฟส 3 — UI/โครงเว็บ (คู่ขนาน)</td><td>หน้า hub สวย ดึงดูดให้สมัคร</td></tr>
+      <tr><td>3</td><td>เฟส 2 — RAG ผู้ช่วย AI</td><td>ตัวสร้างความต่าง เพิ่มคุณค่าให้สมาชิก (ต้องมีโปรเจค/เอกสารพร้อม)</td></tr>
+    </table>
+  </section>
+
+  <section id="need">
+    <h2><span class="num">สิ่งที่ผมต้องการจากคุณ</span> (เพื่อเริ่มสร้าง)</h2>
+    <ul>
+      <li><b>รายการผลงาน</b> ที่จะลงเว็บ — ชื่อ, คำอธิบายสั้น, แพลตฟอร์ม (iOS/Android/Win/Mac), เวอร์ชัน</li>
+      <li><b>แพ็กเกจไหนปลดล็อกอะไร</b> — เช่น Pro โหลดได้ทุกตัว / Free โหลดได้บางตัว</li>
+      <li><b>repo ของผลงาน</b> (สำหรับ GitHub Releases + RAG) — public หรือ private</li>
+      <li><b>(เฟส 2)</b> โปรเจค/เอกสารที่จะให้ AI ศึกษา — โค้ด + README + คู่มือ</li>
+    </ul>
+  </section>
+
+  <footer>
+    Rnai.io Hub Roadmap · 24 มิ.ย. 2026 · เฟส 1 (Downloads) → เฟส 3 (UI) → เฟส 2 (RAG)<br>
+    ต่อยอดจากระบบที่มี: Auth · Billing · Upstash · Rnai LLM · failover
+  </footer>
+
+</div>
+</body>
+</html>

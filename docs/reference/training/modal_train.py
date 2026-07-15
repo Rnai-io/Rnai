@@ -38,10 +38,13 @@ import modal
 
 app = modal.App("rnai-train")
 
-# Train on the expanded set if expand_dataset.py has produced it; else the seed.
-DATA_FILE = ("rnai_dataset.train.jsonl"
-             if os.path.exists("rnai_dataset.train.jsonl")
-             else "rnai_dataset.sample.jsonl")
+# Which dataset to ship & train on. Override with env RNAI_DATA=<file>.
+# Otherwise use the expanded set if it exists, else the seed.
+DATA_FILE = (
+    os.environ.get("RNAI_DATA")
+    or ("rnai_dataset.train.jsonl" if os.path.exists("rnai_dataset.train.jsonl")
+        else "rnai_dataset.sample.jsonl")
+)
 
 HF_SECRET = modal.Secret.from_name("huggingface")            # HUGGING_FACE_HUB_TOKEN
 models_vol = modal.Volume.from_name("rnai-models", create_if_missing=True)
@@ -51,16 +54,12 @@ models_vol = modal.Volume.from_name("rnai-models", create_if_missing=True)
 train_image = (
     modal.Image.from_registry("nvidia/cuda:12.4.1-devel-ubuntu22.04", add_python="3.11")
     .apt_install("git", "build-essential")
-    .pip_install(
-        "torch==2.5.1",
-        "unsloth",
-        "trl",
-        "peft",
-        "transformers",
-        "datasets",
-        "bitsandbytes",
-        "huggingface_hub[hf_transfer]",
-    )
+    # Let Unsloth pin its own compatible torch/triton/trl/peft/transformers/
+    # bitsandbytes. Listing those explicitly makes pip pull newer versions that
+    # clash with Unsloth (e.g. trl removing ConstantLengthDataset, or the
+    # torch.compile "triton.multi_kernel" mismatch). Only add what Unsloth
+    # does NOT already depend on.
+    .pip_install("unsloth", "datasets", "huggingface_hub[hf_transfer]")
     .env({"HF_HUB_ENABLE_HF_TRANSFER": "1"})
     .add_local_file(DATA_FILE, "/root/data.jsonl")
 )

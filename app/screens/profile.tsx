@@ -950,7 +950,7 @@ export default function ProfileScreen() {
               <Text style={{ color: colors.primary, ...TYPOGRAPHY.caption, fontWeight: '700', marginBottom: 4 }}>
                 {lang === 'th' ? 'บัญชี Rnai.io ของคุณ' : 'Your Rnai.io account'}
               </Text>
-              <Text style={{ color: colors.text.secondary, ...TYPOGRAPHY.caption, lineHeight: 18 }}>
+              <Text style={{ color: colors.text.secondary, ...TYPOGRAPHY.caption, lineHeight: 19 }}>
                 {lang === 'th'
                   ? 'เข้าสู่ระบบหรือสมัครสมาชิก แอปจะสร้าง API Key ส่วนตัวให้อัตโนมัติ (สมาชิกใหม่ได้ฟรี 200 เครดิต) คีย์ถูกเก็บปลอดภัยในเครื่องคุณเท่านั้น'
                   : 'Sign in or create an account — the app will mint your personal API key automatically (new users get 200 free credits). Stored securely on this device only.'}

@@ -41,7 +41,12 @@ HF_SECRET = modal.Secret.from_name("huggingface")
 
 
 # ── 1) LLM — vLLM (native /v1/... + /health) ─────────────────────────────────
-LLM_MODEL = "Qwen/Qwen2.5-7B-Instruct"  # ungated; swap for your trained rnai-llm later
+LLM_MODEL = "Qwen/Qwen2.5-7B-Instruct"  # base served in fp16
+
+# Set to your trained adapter's HF repo (e.g. "Rnai-io/rnai-llm") to serve YOUR
+# Rnai LLM. Leave "" to serve the plain base model. When set, vLLM loads the
+# LoRA and the served model name "rnai-llm" returns your fine-tune.
+RNAI_LORA_REPO = "naiguitarfolk/rnai-llm"
 
 vllm_image = (
     modal.Image.debian_slim(python_version="3.12")
@@ -61,12 +66,15 @@ vllm_image = (
 @modal.concurrent(max_inputs=64)
 @modal.web_server(port=8000, startup_timeout=15 * MINUTES)
 def serve():
-    subprocess.Popen([
-        "vllm", "serve", LLM_MODEL,
-        "--served-model-name", "rnai-llm",
-        "--host", "0.0.0.0", "--port", "8000",
-        "--max-model-len", "8192",
-    ])
+    cmd = ["vllm", "serve", LLM_MODEL, "--host", "0.0.0.0", "--port", "8000", "--max-model-len", "8192"]
+    if RNAI_LORA_REPO:
+        # Serve base as "rnai-base" and your fine-tune as the "rnai-llm" LoRA.
+        cmd += ["--served-model-name", "rnai-base",
+                "--enable-lora", "--max-lora-rank", "16",
+                "--lora-modules", f"rnai-llm={RNAI_LORA_REPO}"]
+    else:
+        cmd += ["--served-model-name", "rnai-llm"]
+    subprocess.Popen(cmd)
 
 
 # ── 2) Media (GPU) — SDXL image + Whisper STT + MMS TTS, one FastAPI app ──────

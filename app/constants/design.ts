@@ -68,35 +68,37 @@ export const COLORS = {
   },
 };
 
+// Line heights are generous so tall stacking scripts (Burmese, Khmer, Lao,
+// Thai) are never clipped top/bottom. ~1.45× font size.
 export const TYPOGRAPHY = {
   display: {
     fontSize: 32,
-    lineHeight: 38,
+    lineHeight: 46,
     fontWeight: '700' as const,
   },
   headline: {
     fontSize: 17,
-    lineHeight: 22,
+    lineHeight: 26,
     fontWeight: '600' as const,
   },
   body: {
     fontSize: 17,
-    lineHeight: 22,
+    lineHeight: 26,
     fontWeight: '400' as const,
   },
   callout: {
     fontSize: 16,
-    lineHeight: 20,
+    lineHeight: 24,
     fontWeight: '500' as const,
   },
   subheadline: {
     fontSize: 15,
-    lineHeight: 20,
+    lineHeight: 23,
     fontWeight: '400' as const,
   },
   caption: {
     fontSize: 13,
-    lineHeight: 18,
+    lineHeight: 19,
     fontWeight: '400' as const,
   },
 };

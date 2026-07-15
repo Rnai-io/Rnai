@@ -25,7 +25,7 @@ import { TYPOGRAPHY, SPACING, LAYOUT, BORDER_RADIUS } from '../constants/design'
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { connectOllama, ollamaChat } from '../services/ollama';
-import { geminiChat, fetchBilling, fetchLedger, fetchMyRank, LedgerEntry, MyRank } from '../services/auth';
+import { geminiChat, rnaiChat, fetchBilling, fetchLedger, fetchMyRank, LedgerEntry, MyRank } from '../services/auth';
 import { redeemTrueMoneyVoucher, getErrorMessage } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
@@ -72,6 +72,22 @@ const AI_MODELS = [
     icon: '✨',
     color: ['#9333EA', '#6D28D9'] as [string, string],
     url: 'https://rnai-io.vercel.app',
+    ollamaTag: undefined as string | undefined,
+  },
+  {
+    id: 'rnai-llm',
+    name: 'Rnai LLM',
+    param: '7B',
+    provider: 'Rnai.io',
+    description: "Rnai's own fine-tuned model (beta). Thai/ASEAN + coding. Free for signed-in users.",
+    descriptionTh: 'โมเดลที่ Rnai เทรนเอง (beta) เก่งไทย/อาเซียน + เขียนโค้ด ฟรีสำหรับผู้ที่เข้าสู่ระบบ',
+    tags: ['Beta', 'Thai/ASEAN', 'Code'],
+    size: '—',
+    license: 'Rnai.io',
+    status: 'featured',
+    icon: '🧠',
+    color: ['#D77757', '#8a4b35'] as [string, string],
+    url: 'https://huggingface.co/naiguitarfolk/rnai-llm',
     ollamaTag: undefined as string | undefined,
   },
   {
@@ -188,7 +204,7 @@ export default function AiManagerScreen() {
   // ── Model runtime: where a model actually runs ───────────────────────────────
   // 'cloud' = Rnai cloud (Gemini), works instantly when signed in.
   // 'lan'   = runs via the user's own Ollama server over LAN (needs connecting).
-  const isCloudModel = (m: typeof AI_MODELS[number]) => m.id === 'rnai-gemini';
+  const isCloudModel = (m: typeof AI_MODELS[number]) => m.id === 'rnai-gemini' || m.id === 'rnai-llm';
   const isLanModel = (m: typeof AI_MODELS[number]) => !isCloudModel(m);
   /** Is this specific model usable right now? */
   const modelReady = (m: typeof AI_MODELS[number]) => isCloudModel(m) ? !!authUser : ollamaConnected;
@@ -287,6 +303,20 @@ export default function AiManagerScreen() {
     ? [colors.gradient[0], colors.gradient[1], colors.gradient[2]]
     : [colors.background, colors.background, colors.background];
 
+  // Pre-warm the self-hosted Rnai LLM when the user selects it, so the first
+  // chat message doesn't hit a cold start. Fire-and-forget; needs the Modal
+  // serve URL in EXPO_PUBLIC_RNAI_LLM_URL (otherwise it's a no-op).
+  React.useEffect(() => {
+    if (selectedModel.id !== 'rnai-llm') return;
+    const url = (process.env.EXPO_PUBLIC_RNAI_LLM_URL || '').trim();
+    if (!url) return;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 8000);
+    fetch(`${url.replace(/\/+$/, '')}/v1/models`, { signal: controller.signal })
+      .catch(() => {})
+      .finally(() => clearTimeout(timer));
+  }, [selectedModel]);
+
   const handleChat = async () => {
     const text = chatInput.trim();
     if (!text || chatLoading) return;
@@ -308,6 +338,22 @@ export default function AiManagerScreen() {
           return;
         }
         const reply = await geminiChat(text);
+        setChatMessages(prev => [...prev, { role: 'ai', text: reply }]);
+        return;
+      }
+
+      // ── 1b. Rnai LLM (our own fine-tune) — free, signed-in; may cold-start ──
+      if (selectedModel.id === 'rnai-llm') {
+        if (!authUser) {
+          setChatMessages(prev => [...prev, {
+            role: 'ai',
+            text: lang === 'th'
+              ? '🔐 เข้าสู่ระบบก่อนเพื่อใช้ Rnai LLM (ฟรี) — ไปที่ โปรไฟล์ > API Key'
+              : '🔐 Sign in to use Rnai LLM (free) — go to Profile > API Key.',
+          }]);
+          return;
+        }
+        const reply = await rnaiChat(text);
         setChatMessages(prev => [...prev, { role: 'ai', text: reply }]);
         return;
       }

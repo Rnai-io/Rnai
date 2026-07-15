@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="bg2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0E4D5C"/>
+      <stop offset="1" stop-color="#07242E"/>
+    </linearGradient>
+    <linearGradient id="petalGold" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#F0A32B"/>
+      <stop offset="1" stop-color="#FFD97A"/>
+    </linearGradient>
+    <linearGradient id="petalTealIn" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#0D9488"/>
+      <stop offset="1" stop-color="#5EEAD4"/>
+    </linearGradient>
+    <linearGradient id="petalTealOut" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#0F766E"/>
+      <stop offset="1" stop-color="#2DD4BF"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1024" height="1024" rx="180" fill="url(#bg2)"/>
+
+  <!-- outer petals -->
+  <path d="M 285 500 C 260 600, 320 690, 470 722 C 380 650, 330 570, 285 500 Z" fill="url(#petalTealOut)"/>
+  <path d="M 739 500 C 764 600, 704 690, 554 722 C 644 650, 694 570, 739 500 Z" fill="url(#petalTealOut)"/>
+
+  <!-- inner side petals -->
+  <path d="M 375 390 C 320 500, 350 630, 490 708 C 420 590, 400 480, 375 390 Z" fill="url(#petalTealIn)"/>
+  <path d="M 649 390 C 704 500, 674 630, 534 708 C 604 590, 624 480, 649 390 Z" fill="url(#petalTealIn)"/>
+
+  <!-- center petal (gold) -->
+  <path d="M 512 300 C 430 425, 430 565, 512 705 C 594 565, 594 425, 512 300 Z" fill="url(#petalGold)"/>
+
+  <!-- petal tip nodes (โครงข่าย AI) -->
+  <circle cx="512" cy="306" r="14" fill="#FFFFFF"/>
+  <circle cx="376" cy="392" r="11" fill="#FFFFFF" opacity="0.9"/>
+  <circle cx="648" cy="392" r="11" fill="#FFFFFF" opacity="0.9"/>
+  <circle cx="287" cy="502" r="9" fill="#FFFFFF" opacity="0.8"/>
+  <circle cx="737" cy="502" r="9" fill="#FFFFFF" opacity="0.8"/>
+
+  <!-- AI spark above -->
+  <circle cx="512" cy="222" r="16" fill="#FFD97A"/>
+  <circle cx="512" cy="222" r="34" fill="none" stroke="#FFD97A" stroke-width="5" opacity="0.55"/>
+
+  <!-- water lines -->
+  <path d="M 330 790 Q 512 830 694 790" fill="none" stroke="#2DD4BF" stroke-width="14" stroke-linecap="round" opacity="0.65"/>
+  <path d="M 400 848 Q 512 872 624 848" fill="none" stroke="#2DD4BF" stroke-width="12" stroke-linecap="round" opacity="0.4"/>
+</svg>

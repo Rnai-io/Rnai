@@ -219,11 +219,13 @@ export const SKILL_ENDPOINTS: Record<string, SkillEndpoint> = {
     }),
   },
 
-  /** Code generation from natural language — routed through text/generate */
+  /** Code generation from natural language — routed through text/generate.
+   *  mode:'code' makes the backend prefer the self-hosted Rnai LLM (tuned for code). */
   'text-code': {
     path: '/api/v1/text/generate', ready: true,
     buildPayload: ({ prompt, extra }) => ({
       prompt: `You are an expert ${extra?.language ?? 'JavaScript'} developer. Generate clean, well-commented ${extra?.language ?? 'JavaScript'} code for the following requirement. Return ONLY the code block with no extra explanation:\n\n${prompt}`,
+      mode: 'code',
     }),
   },
 

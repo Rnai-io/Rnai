@@ -392,6 +392,35 @@ export async function geminiChat(message: string): Promise<string> {
   return data.text;
 }
 
+/**
+ * Chat with the self-hosted Rnai LLM (the fine-tuned model) — free for signed-in
+ * users. First message after idle may be slow (model cold-start). Throws AuthError.
+ */
+export async function rnaiChat(message: string): Promise<string> {
+  const idToken = await getFreshIdToken();
+  if (!idToken) {
+    throw new AuthError('UNKNOWN', 'Sign in required for Rnai chat');
+  }
+  let res: Response;
+  try {
+    res = await fetch(`${API_CONFIG.baseUrl}/api/rnai/chat`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${idToken}`,
+      },
+      body: JSON.stringify({ message }),
+    });
+  } catch {
+    throw new AuthError('NETWORK', 'Network request failed');
+  }
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || typeof data?.text !== 'string') {
+    throw new AuthError('UNKNOWN', data?.error ?? 'Rnai chat failed');
+  }
+  return data.text;
+}
+
 // ── Password reset ──────────────────────────────────────────────────────────
 
 /** Send a Firebase password-reset email. */
