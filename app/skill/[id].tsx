@@ -1041,6 +1041,10 @@ export default function SkillDetailScreen() {
                       ? (lang === 'th'
                           ? 'บรรยายเนื้อหาและเป้าหมายของเว็บไซต์ เช่น "เว็บพอร์ตโฟลิโอสำหรับนักออกแบบกราฟิก..."'
                           : 'Describe your website content and goals, e.g. "A portfolio for a graphic designer..."')
+                      : id === 'text-extract'
+                      ? (lang === 'th'
+                          ? '🧩 วางข้อความที่ต้องการสกัดข้อมูล เช่น ใบเสร็จ ออเดอร์จากแชท ประกาศ — ระบบจะดึงข้อมูลสำคัญออกมาเป็น JSON ให้ (ลองกดตัวอย่างด้านบนได้เลย)'
+                          : '🧩 Paste the text to extract from — a receipt, chat order, listing or announcement. Key fields will be returned as JSON (try an example above)')
                       : t.skill.placeholders.text
                   }
                   placeholderTextColor={colors.text.tertiary}

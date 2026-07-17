@@ -872,6 +872,70 @@ export const SKILL_TEMPLATES: Record<string, PromptTemplate[]> = {
       },
     },
   ],
+
+  // ─── 17. EXTRACT DATA (text → structured JSON) ────────────────────────────
+  'text-extract': [
+    {
+      id: 'te-1',
+      label: '🧾 Receipt / Slip',
+      prompt: 'Receipt — Baan Kafae Coffee House\nDate: 12/07/2026 14:32  Receipt #A-0847\nIced Latte (L) x2 ....... 170.00\nButter Croissant x1 ..... 75.00\nBanana Cake x1 .......... 85.00\nSubtotal ................ 330.00\nVAT 7% .................. 23.10\nTotal ................... 353.10\nPaid: PromptPay',
+      exampleImage: undefined,
+      exampleCaption: '🧩 Receipt → JSON: merchant, date, items, totals',
+      th: {
+        label: '🧾 ใบเสร็จ/สลิป',
+        prompt: 'ใบเสร็จรับเงิน — ร้านบ้านกาแฟ\nวันที่ 12/07/2026 14:32 เลขที่ A-0847\nลาเต้เย็น (L) x2 ....... 170.00\nครัวซองต์เนย x1 ........ 75.00\nเค้กกล้วยหอม x1 ........ 85.00\nรวม .................... 330.00\nVAT 7% ................. 23.10\nยอดสุทธิ ............... 353.10\nชำระโดย: พร้อมเพย์',
+        caption: '🧩 ใบเสร็จ → JSON: ร้าน วันที่ รายการ ยอดรวม',
+      },
+    },
+    {
+      id: 'te-2',
+      label: '📇 Contact Info',
+      prompt: 'Hi, this is Somchai Jaidee, Senior Sales Manager at TechNova Co., Ltd. You can reach me at 081-234-5678 or somchai.j@technova.co.th. Our office is at 88 Sukhumvit 21, Bangkok 10110. Feel free to call weekdays 9am-6pm.',
+      exampleImage: undefined,
+      exampleCaption: '🧩 Signature → JSON: name, title, company, phone, email',
+      th: {
+        label: '📇 ข้อมูลติดต่อ',
+        prompt: 'สวัสดีครับ ผมสมชาย ใจดี ตำแหน่งผู้จัดการฝ่ายขายอาวุโส บริษัท เทคโนวา จำกัด ติดต่อได้ที่ 081-234-5678 หรืออีเมล somchai.j@technova.co.th สำนักงานอยู่ที่ 88 สุขุมวิท 21 กรุงเทพฯ 10110 โทรได้จันทร์-ศุกร์ 9 โมงเช้าถึง 6 โมงเย็นครับ',
+        caption: '🧩 ลายเซ็น/ข้อความ → JSON: ชื่อ ตำแหน่ง บริษัท เบอร์ อีเมล',
+      },
+    },
+    {
+      id: 'te-3',
+      label: '🛒 Chat Order',
+      prompt: 'Customer message: "Hello! I\'d like to order 2 boxes of brownies (the dark chocolate ones) and 1 box of butter cookies. Deliver to 45/2 Ladprao 71, Bangkok 10230. I\'ll pay by transfer. Can you send them this Friday? My number is 089-555-1234, name Bee."',
+      exampleImage: undefined,
+      exampleCaption: '🧩 Chat message → JSON: items, qty, address, delivery date',
+      th: {
+        label: '🛒 ออเดอร์จากแชท',
+        prompt: 'ข้อความลูกค้า: "สวัสดีค่ะ ขอสั่งบราวนี่ดาร์กช็อกโกแลต 2 กล่อง กับคุกกี้เนย 1 กล่องนะคะ ส่งที่ 45/2 ลาดพร้าว 71 กรุงเทพฯ 10230 โอนจ่ายค่ะ ส่งวันศุกร์นี้ได้ไหมคะ เบอร์ 089-555-1234 ชื่อบีค่ะ"',
+        caption: '🧩 แชทสั่งซื้อ → JSON: สินค้า จำนวน ที่อยู่ วันส่ง',
+      },
+    },
+    {
+      id: 'te-4',
+      label: '🏠 Property Listing',
+      prompt: 'FOR SALE: Modern 2-story detached house, 3 bedrooms, 2 bathrooms, 180 sqm on a 50 sq.wah plot in Nirvana Village, Bangna. Fully furnished, near Mega Bangna and international schools. Price 6.9 million baht (negotiable). Contact: 062-777-8899 Khun Nok.',
+      exampleImage: undefined,
+      exampleCaption: '🧩 Listing → JSON: type, beds, size, location, price',
+      th: {
+        label: '🏠 ประกาศอสังหาฯ',
+        prompt: 'ขายด่วน! บ้านเดี่ยว 2 ชั้นสไตล์โมเดิร์น 3 ห้องนอน 2 ห้องน้ำ พื้นที่ใช้สอย 180 ตร.ม. ที่ดิน 50 ตร.วา หมู่บ้านนิรวานา บางนา เฟอร์นิเจอร์ครบ ใกล้เมกาบางนาและโรงเรียนอินเตอร์ ราคา 6.9 ล้านบาท (ต่อรองได้) ติดต่อ 062-777-8899 คุณนก',
+        caption: '🧩 ประกาศขาย → JSON: ประเภท ห้องนอน ขนาด ทำเล ราคา',
+      },
+    },
+    {
+      id: 'te-5',
+      label: '📅 Event Details',
+      prompt: 'Join us for the "AI for Business 2026" seminar on Saturday, August 22nd, 2026, from 9:00 AM to 4:30 PM at Queen Sirikit National Convention Center, Room Ballroom B. Early-bird ticket 1,290 THB until July 31st, regular 1,890 THB. Register at aibiz2026.com or call 02-123-4567.',
+      exampleImage: undefined,
+      exampleCaption: '🧩 Announcement → JSON: event, date, time, venue, price',
+      th: {
+        label: '📅 รายละเอียดงานอีเวนต์',
+        prompt: 'ขอเชิญร่วมงานสัมมนา "AI for Business 2026" วันเสาร์ที่ 22 สิงหาคม 2569 เวลา 9:00-16:30 น. ณ ศูนย์การประชุมแห่งชาติสิริกิติ์ ห้องบอลรูม B บัตร Early-bird 1,290 บาท ถึง 31 ก.ค. หลังจากนั้น 1,890 บาท ลงทะเบียนที่ aibiz2026.com หรือโทร 02-123-4567',
+        caption: '🧩 ประกาศงาน → JSON: ชื่องาน วันเวลา สถานที่ ราคา',
+      },
+    },
+  ],
 };
 
 // Helper to get skill type category
