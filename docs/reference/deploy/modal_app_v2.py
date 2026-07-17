@@ -38,7 +38,7 @@ hf_cache = modal.Volume.from_name("rnai-hf-cache", create_if_missing=True)
 HF_SECRET = modal.Secret.from_name("huggingface")
 
 LLM_MODEL = "Qwen/Qwen3-8B"
-RNAI_LORA_REPO = "naiguitarfolk/rnai-llm-v3"   # adapter v3.1 (r=32, Qwen3-8B)
+RNAI_LORA_REPO = "naiguitarfolk/rnai-llm-v3-2"   # adapter v3.2 (r=32, Qwen3-8B, dataset 307)
 SERVED_NAME = "rnai-llm"                        # ชื่อเดิม — backend ไม่ต้องแก้ SELF_VLLM_MODEL
 
 vllm_image = (
