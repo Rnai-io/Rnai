@@ -173,8 +173,7 @@ export default function AuthScreen() {
               fontSize: 30, fontWeight: '800', letterSpacing: 0.5,
               color: isVibrant ? colors.primary : colors.text.primary,
             }}>
-              RnAi
-              <Text style={{ color: colors.text.tertiary, fontWeight: '600' }}>.io</Text>
+              Rnai
             </Text>
             <Text style={{ ...TYPOGRAPHY.subheadline, color: colors.text.secondary, marginTop: 4, textAlign: 'center' }}>
               {th ? 'สร้างทุกอย่างด้วย AI — ภาพ ข้อความ เว็บไซต์ เสียง' : 'Create anything with AI — images, text, websites, audio'}
