@@ -1,5 +1,5 @@
 /**
- * Rnai.io — In-app authentication (Phase B)
+ * Rnai — In-app authentication (Phase B)
  *
  * Flow: Firebase Auth (email/password via REST) → init user on platform
  * (/api/auth/session grants 200 free credits on first signup) → mint a
@@ -361,7 +361,7 @@ export async function wasAuthSkipped(): Promise<boolean> {
   }
 }
 
-// ── Free cloud AI chat (Gemini via the Rnai.io platform) ───────────────────
+// ── Free cloud AI chat (Gemini via the Rnai platform) ───────────────────
 
 /**
  * Chat with Gemini through the platform — free for signed-in users.

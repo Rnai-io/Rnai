@@ -795,7 +795,7 @@ export default function ProfileScreen() {
             <SettingsRow icon="chatbubble-outline" iconColor="#8B5CF6" iconBg="#EDE9FE"
               label={t.profile.fields.feedback}
               onPress={() => Linking.openURL(
-                `mailto:naiguitarfolk@gmail.com?subject=${encodeURIComponent('Rnai.io Mobile Feedback')}&body=${encodeURIComponent(`\n\n—\nApp v${Constants.expoConfig?.version ?? '2.0.0'} · ${authUser?.email ?? 'guest'}`)}`
+                `mailto:naiguitarfolk@gmail.com?subject=${encodeURIComponent('Rnai Mobile Feedback')}&body=${encodeURIComponent(`\n\n—\nApp v${Constants.expoConfig?.version ?? '2.0.0'} · ${authUser?.email ?? 'guest'}`)}`
               ).catch(() => Alert.alert(t.common.error, lang === 'th' ? 'เปิดแอปอีเมลไม่ได้' : 'Could not open mail app.'))} />
             <SettingsRow icon="document-text-outline" iconColor="#6B7280" iconBg="#F3F4F6"
               label={t.profile.fields.privacy}
@@ -948,7 +948,7 @@ export default function ProfileScreen() {
           <ScrollView contentContainerStyle={{ padding: LAYOUT.screenPadding }} keyboardShouldPersistTaps="handled">
             <View style={{ backgroundColor: `${colors.primary}10`, borderRadius: 14, padding: SPACING.lg, marginBottom: SPACING.xl }}>
               <Text style={{ color: colors.primary, ...TYPOGRAPHY.caption, fontWeight: '700', marginBottom: 4 }}>
-                {lang === 'th' ? 'บัญชี Rnai.io ของคุณ' : 'Your Rnai.io account'}
+                {lang === 'th' ? 'บัญชี Rnai ของคุณ' : 'Your Rnai account'}
               </Text>
               <Text style={{ color: colors.text.secondary, ...TYPOGRAPHY.caption, lineHeight: 19 }}>
                 {lang === 'th'

@@ -1,5 +1,5 @@
 /**
- * Prompt Templates for Rnai.io Skills
+ * Prompt Templates for Rnai Skills
  * 5 templates per skill, each with an example output image/text
  */
 
@@ -307,12 +307,12 @@ export const SKILL_TEMPLATES: Record<string, PromptTemplate[]> = {
     {
       id: 'tg-5',
       label: '✉️ Business Email',
-      prompt: 'Write a formal email to request a 30-minute meeting with a potential investor at a tech conference. Express genuine interest in their portfolio, briefly introduce the company Rnai.io, and propose 3 available time slots.',
+      prompt: 'Write a formal email to request a 30-minute meeting with a potential investor at a tech conference. Express genuine interest in their portfolio, briefly introduce the company Rnai, and propose 3 available time slots.',
       exampleImage: undefined,
       exampleCaption: '📝 Professional investor outreach email with clear CTA',
       th: {
         label: '✉️ อีเมลธุรกิจ',
-        prompt: 'เขียนอีเมลภาษาไทยแบบทางการ เพื่อขอนัดประชุม 30 นาทีกับนักลงทุนที่งานสัมมนาเทคโนโลยี แสดงความสนใจในพอร์ตการลงทุนของเขาอย่างจริงใจ แนะนำบริษัท Rnai.io สั้นๆ และเสนอช่วงเวลานัด 3 ตัวเลือก',
+        prompt: 'เขียนอีเมลภาษาไทยแบบทางการ เพื่อขอนัดประชุม 30 นาทีกับนักลงทุนที่งานสัมมนาเทคโนโลยี แสดงความสนใจในพอร์ตการลงทุนของเขาอย่างจริงใจ แนะนำบริษัท Rnai สั้นๆ และเสนอช่วงเวลานัด 3 ตัวเลือก',
         caption: '📝 อีเมลติดต่อนักลงทุนแบบมืออาชีพ พร้อมข้อเสนอชัดเจน',
       },
     },

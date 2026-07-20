@@ -1,5 +1,5 @@
 /**
- * Rnai.io — Central API Layer
+ * Rnai — Central API Layer
  *
  * Single place for all backend skill calls:
  * - Endpoint registry for every skill (ready / coming-soon flags)
@@ -597,7 +597,7 @@ export interface TrueMoneyRedeemResult {
 }
 
 /**
- * Redeem a TrueMoney Gift Voucher (e-Voucher) for Rnai.io credits.
+ * Redeem a TrueMoney Gift Voucher (e-Voucher) for Rnai credits.
  *
  * Accepts either the full gift URL or just the hash code:
  *   - https://gift.truemoney.com/campaign/?v=<HASH>

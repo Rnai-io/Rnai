@@ -1,5 +1,5 @@
 /**
- * Rnai.io — Ollama client (local LAN inference)
+ * Rnai — Ollama client (local LAN inference)
  * Talks to a user's own Ollama server (http://<lan-ip>:11434).
  */
 

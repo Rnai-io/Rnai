@@ -1,5 +1,5 @@
 /**
- * Rnai.io — Auth Screen (Login / Register)
+ * Rnai — Auth Screen (Login / Register)
  * Shown at launch when the user is not signed in and hasn't skipped.
  */
 

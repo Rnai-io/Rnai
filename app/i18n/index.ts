@@ -1,5 +1,5 @@
 /**
- * Rnai.io — Internationalization (i18n)
+ * Rnai — Internationalization (i18n)
  * Supported: th, en, ja, zh, ko, fr, de, es
  * ASEAN:     id, ms, vi, fil, km, lo, my
  */

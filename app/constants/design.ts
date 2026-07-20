@@ -1,5 +1,5 @@
 /**
- * Rnai.io Mobile Design System
+ * Rnai Mobile Design System
  * iOS-first, accessible design tokens
  */
 

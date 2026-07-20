@@ -1,5 +1,5 @@
 /**
- * Rnai.io — AI Manager Screen
+ * Rnai — AI Manager Screen
  *
  * LEGAL NOTICE:
  * - AI model management: Fully legal (open-source, local)
@@ -62,12 +62,12 @@ const AI_MODELS = [
     id: 'rnai-gemini',
     name: 'Rnai Cloud Chat',
     param: 'Gemini 2.5',
-    provider: 'Google × Rnai.io',
+    provider: 'Google × Rnai',
     description: 'Free cloud AI chat for signed-in users. Works instantly — no setup, no downloads, powered by Gemini Flash.',
     descriptionTh: 'แชท AI คลาวด์ฟรีสำหรับผู้ที่เข้าสู่ระบบ ใช้ได้ทันที ไม่ต้องติดตั้งอะไร ขับเคลื่อนด้วย Gemini Flash',
     tags: ['Free', 'Cloud', 'Instant'],
     size: '—',
-    license: 'Rnai.io',
+    license: 'Rnai',
     status: 'featured',
     icon: '✨',
     color: ['#9333EA', '#6D28D9'] as [string, string],
@@ -78,12 +78,12 @@ const AI_MODELS = [
     id: 'rnai-llm',
     name: 'Rnai LLM',
     param: '7B',
-    provider: 'Rnai.io',
+    provider: 'Rnai',
     description: "Rnai's own fine-tuned model (beta). Thai/ASEAN + coding. Free for signed-in users.",
     descriptionTh: 'โมเดลที่ Rnai เทรนเอง (beta) เก่งไทย/อาเซียน + เขียนโค้ด ฟรีสำหรับผู้ที่เข้าสู่ระบบ',
     tags: ['Beta', 'Thai/ASEAN', 'Code'],
     size: '—',
-    license: 'Rnai.io',
+    license: 'Rnai',
     status: 'featured',
     icon: '🧠',
     color: ['#D77757', '#8a4b35'] as [string, string],

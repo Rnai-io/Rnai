@@ -457,10 +457,10 @@ export default function LibraryScreen() {
         } else { await Share.share({ message: item.content.substring(0, 1000) }); }
         break;
       case 'ig':      Linking.openURL('instagram://').catch(() => Linking.openURL('https://www.instagram.com')); break;
-      case 'twitter': Linking.openURL(`https://twitter.com/intent/tweet?text=${encodeURIComponent(item.type === 'text' ? item.content.substring(0, 280) : item.title + ' - made with Rnai.io')}`); break;
+      case 'twitter': Linking.openURL(`https://twitter.com/intent/tweet?text=${encodeURIComponent(item.type === 'text' ? item.content.substring(0, 280) : item.title + ' - made with Rnai')}`); break;
       case 'fb':      Linking.openURL('https://www.facebook.com/sharer/sharer.php?u=https://rnai.io'); break;
       case 'line':    Linking.openURL(`https://line.me/R/msg/text/?${encodeURIComponent(item.title)}`); break;
-      case 'wa':      Linking.openURL(`whatsapp://send?text=${encodeURIComponent(item.title + ' - made with Rnai.io')}`); break;
+      case 'wa':      Linking.openURL(`whatsapp://send?text=${encodeURIComponent(item.title + ' - made with Rnai')}`); break;
     }
     setShareItem(null);
   };

@@ -1,5 +1,5 @@
 /**
- * Rnai.io — Legal content (Privacy Policy & Terms of Service)
+ * Rnai — Legal content (Privacy Policy & Terms of Service)
  *
  * The authoritative versions are Thai (th) and English (en). For every other
  * supported language the screen shows the English body together with a short,
@@ -95,7 +95,7 @@ export const LEGAL_UI: Record<LangCode, LegalUI> = {
 
 const PRIVACY_EN: LegalSection[] = [
   { heading: '1. Who we are',
-    body: 'Rnai.io ("Rnai", "we", "us") provides an AI creation app for iOS and Android. This Privacy Policy explains what we collect, why, and the choices you have. Questions? Contact ' + LEGAL_CONTACT + '.' },
+    body: 'Rnai ("Rnai", "we", "us") provides an AI creation app for iOS and Android. This Privacy Policy explains what we collect, why, and the choices you have. Questions? Contact ' + LEGAL_CONTACT + '.' },
   { heading: '2. Information we collect',
     body: '• Account: your email address and authentication tokens, handled via Firebase Authentication (Google) when you sign up or sign in.\n• Profile: a display name and an optional profile photo you choose. These are stored on your device and may be sent to our servers to power your account.\n• Content you create: prompts, uploaded images, and generated results. Your library is stored locally on your device by default.\n• Payments & credits: your credit balance, usage history, and TrueMoney Gift Voucher redemptions processed through our backend.\n• Your API key: if you add a personal Rnai API key it is stored securely on-device in the system keychain (Secure Store) and sent only to the Rnai backend to authorize your requests.\n• Diagnostics: basic, non-identifying technical information needed to operate the service.' },
   { heading: '3. How we use your information',
@@ -118,7 +118,7 @@ const PRIVACY_EN: LegalSection[] = [
 
 const PRIVACY_TH: LegalSection[] = [
   { heading: '1. เราคือใคร',
-    body: 'Rnai.io ("Rnai", "เรา") ให้บริการแอปสร้างสรรค์ผลงานด้วย AI บน iOS และ Android นโยบายนี้อธิบายว่าเราเก็บข้อมูลอะไร เพราะอะไร และคุณมีทางเลือกใดบ้าง หากมีคำถามติดต่อ ' + LEGAL_CONTACT },
+    body: 'Rnai ("Rnai", "เรา") ให้บริการแอปสร้างสรรค์ผลงานด้วย AI บน iOS และ Android นโยบายนี้อธิบายว่าเราเก็บข้อมูลอะไร เพราะอะไร และคุณมีทางเลือกใดบ้าง หากมีคำถามติดต่อ ' + LEGAL_CONTACT },
   { heading: '2. ข้อมูลที่เราเก็บ',
     body: '• บัญชี: อีเมลและโทเค็นการยืนยันตัวตน จัดการผ่าน Firebase Authentication (Google) เมื่อคุณสมัครหรือเข้าสู่ระบบ\n• โปรไฟล์: ชื่อที่แสดงและรูปโปรไฟล์ (ถ้ามี) ที่คุณเลือก เก็บไว้บนอุปกรณ์ของคุณ และอาจส่งไปยังเซิร์ฟเวอร์เพื่อใช้งานบัญชี\n• ผลงานที่คุณสร้าง: คำสั่ง (prompt) รูปที่อัปโหลด และผลลัพธ์ โดยปกติคลังผลงานจะเก็บไว้บนอุปกรณ์ของคุณ\n• การชำระเงินและเครดิต: ยอดเครดิต ประวัติการใช้งาน และการแลก TrueMoney Gift Voucher ที่ประมวลผลผ่านระบบหลังบ้านของเรา\n• API Key ของคุณ: หากคุณเพิ่มคีย์ส่วนตัว จะถูกเก็บอย่างปลอดภัยบนอุปกรณ์ในที่เก็บกุญแจของระบบ (Secure Store) และส่งเฉพาะไปยังระบบหลังบ้าน Rnai เพื่ออนุญาตคำขอของคุณ\n• ข้อมูลวิเคราะห์ระบบ: ข้อมูลทางเทคนิคพื้นฐานที่ไม่ระบุตัวตน ซึ่งจำเป็นต่อการให้บริการ' },
   { heading: '3. เราใช้ข้อมูลอย่างไร',
@@ -143,7 +143,7 @@ const PRIVACY_TH: LegalSection[] = [
 
 const TERMS_EN: LegalSection[] = [
   { heading: '1. Acceptance',
-    body: 'By using the Rnai.io app you agree to these Terms. If you do not agree, please do not use the app. You must be old enough to form a binding agreement in your country.' },
+    body: 'By using the Rnai app you agree to these Terms. If you do not agree, please do not use the app. You must be old enough to form a binding agreement in your country.' },
   { heading: '2. Your account',
     body: 'You are responsible for activity under your account and for keeping your sign-in and any API key confidential. Provide accurate information and let us know of any unauthorized use.' },
   { heading: '3. Credits & payments',
@@ -170,7 +170,7 @@ const TERMS_EN: LegalSection[] = [
 
 const TERMS_TH: LegalSection[] = [
   { heading: '1. การยอมรับเงื่อนไข',
-    body: 'การใช้แอป Rnai.io ถือว่าคุณยอมรับข้อกำหนดเหล่านี้ หากไม่ยอมรับโปรดงดใช้งาน คุณต้องมีอายุเพียงพอที่จะทำข้อตกลงที่มีผลผูกพันตามกฎหมายในประเทศของคุณ' },
+    body: 'การใช้แอป Rnai ถือว่าคุณยอมรับข้อกำหนดเหล่านี้ หากไม่ยอมรับโปรดงดใช้งาน คุณต้องมีอายุเพียงพอที่จะทำข้อตกลงที่มีผลผูกพันตามกฎหมายในประเทศของคุณ' },
   { heading: '2. บัญชีของคุณ',
     body: 'คุณรับผิดชอบกิจกรรมภายใต้บัญชีของคุณ และต้องรักษาข้อมูลการเข้าสู่ระบบและ API Key ให้เป็นความลับ กรุณาให้ข้อมูลที่ถูกต้องและแจ้งเราหากพบการใช้งานโดยไม่ได้รับอนุญาต' },
   { heading: '3. เครดิตและการชำระเงิน',

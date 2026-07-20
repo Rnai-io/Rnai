@@ -1264,7 +1264,7 @@ export default function SkillDetailScreen() {
                   onPress={async () => {
                     try {
                       await Share.share({
-                        message: resultIsImage ? `${skill.name} — made with Rnai.io` : resultDisplayText.substring(0, 500),
+                        message: resultIsImage ? `${skill.name} — made with Rnai` : resultDisplayText.substring(0, 500),
                         url: resultIsImage ? result.content : undefined,
                       });
                     } catch { /* user cancelled */ }
